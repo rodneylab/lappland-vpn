@@ -69,7 +69,7 @@ def main():
     else:
         server_name = get_random_server_name()
 
-    firewall_select_source = '["0.0.0.0/0"]'
+    firewall_select_source = "0.0.0.0/0"
     if 'firewall_select_source' in parameters:
         firewall_select_source = parameters['firewall_select_source']
 
@@ -81,12 +81,12 @@ def main():
     subprocess.check_call(command, env=env_copy)
 
     # prompt for image path
-    env_copy['TF_VAR_image'] = './openbsd-amd64-68-210227.tar.gz'
+    env_copy['TF_VAR_image'] = '../openbsd-amd64-68-210227.tar.gz'
     env_copy['TF_VAR_image_name'] = 'openbsd-amd64-68-210227.tar.gz'
     env_copy['TF_VAR_image_family'] = 'openbsd-amd64-68'
 
     env_copy['TF_VAR_bucket'] = 'lappland-openbsd-images-' + get_date_string()
-    env_copy['TF_VAR_project_id'] = os.getenv('PROJECT_ID')
+    env_copy['TF_VAR_project_id'] = os.getenv('GOOGLE_PROJECT')
     env_copy['TF_VAR_region'] = region
     env_copy['TF_VAR_server_name'] = server_name
     env_copy['TF_VAR_ssh_port'] = str(parameters['ssh_port'])
