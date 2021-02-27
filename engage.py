@@ -42,11 +42,11 @@ def get_date_string():
 
 
 def get_ssh_key_name():
-    return './configs/id_ed25519_lappland_' + get_date_string() + '.pub'
+    return './configs/id_ed25519_lappland_' + get_date_string()
 
 
 def get_ssh_public_key(filename):
-    f = open(filename, 'r')
+    f = open(filename + '.pub', 'r')
     return str(f.readlines()[0])
 
 
