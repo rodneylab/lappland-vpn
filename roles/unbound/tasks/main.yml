@@ -1,0 +1,124 @@
+---
+- name: unbound enabled
+  shell: "rcctl enable unbound"
+  changed_when: false
+  check_mode: no
+
+- name: unbound started
+  shell: "rcctl start unbound"
+  register: unbound_start_cmd
+  failed_when: unbound_start_cmd.rc >= 1
+  check_mode: no
+
+- name: unbound config deployed
+  template:
+    src: unbound.conf
+    dest: /var/unbound/etc/unbound.conf
+    owner: root
+    group: wheel
+    mode: 644
+    backup: yes
+  notify:
+    - enable unbound
+
+- name: unbound log folder created
+  file:
+    path: /var/unbound/log
+    owner: root
+    group: wheel
+    state: directory
+    mode: 0755
+
+- name: unbound log created
+  copy:
+    content: ""
+    dest: /var/unbound/log/unbound.log
+    force: no
+    owner: _unbound
+    group: wheel
+    mode: 0644
+  notify:
+    - start unbound
+
+- name: checked for root.key for dnssec
+  shell: "ls /var/unbound/db/root.key"
+  register: rootkey
+  ignore_errors: true
+  changed_when: false
+  check_mode: no
+
+- name: unbound root.key created
+  shell: unbound-anchor -a "/var/unbound/db/root.key"
+  args:
+    creates: /var/unbound/db/root.key
+  register: createrootkey
+  changed_when: false
+  failed_when: createrootkey.rc == 2
+  notify:
+    - restart unbound
+
+- name: zone-block.sh deployed
+  template:
+    src: zone-block.sh
+    dest: /var/unbound/etc/
+    owner: "{{ admin_account }}"
+    group: admins
+    mode: 0755
+    backup: no
+
+- name: unbound blocklist whitelist deployed
+  template:
+    src: whitelist.txt
+    dest: /var/unbound/etc/
+    owner: "{{ admin_account }}"
+    group: admins
+    mode: 0644
+    backup: no
+
+- name: restart-unbound script deployed
+  template:
+    src: restart-unbound.sh
+    dest: /var/unbound/etc/
+    owner: root
+    group: wheel
+    mode: 0750
+    backup: no
+
+- name: zone-block-general.conf
+  shell: "sh /var/unbound/etc/zone-block.sh"
+  changed_when: false
+  check_mode: no
+  notify:
+    - restart unbound
+
+- name: resolv.conf deployed
+  template:
+    src: resolv.conf
+    dest: /etc/resolv.conf
+    owner: root
+    group: wheel
+    mode: 0644
+    backup: no
+
+- name: dhclient.conf deployed
+  template:
+    src: dhclient.conf
+    dest: /etc/dhclient.conf
+    owner: root
+    group: wheel
+    mode: 0644
+    backup: no
+
+- name: zone-block script added to cron
+  cron:
+    name: Unbound hosts update
+    minute: "~"
+    hour: "{{ range(0, 24) | random }}"
+    job: "/bin/sh /var/unbound/etc/zone-block.sh"
+    user: root
+
+- name: unbound is started and enabled
+  service:
+    name: unbound
+    state: started
+    enabled: yes

@@ -1,0 +1,128 @@
+---
+- name: All packages on the system updated
+  community.general.openbsd_pkg:
+    name: '*'
+    state: latest
+
+- name: System packages installed
+  community.general.openbsd_pkg:
+    name:
+      - bash
+      - git
+      - vim--no_x11
+      - wget
+    state: present
+
+- name: Deploy /etc/motd
+  template:
+    src: motd
+    dest: /etc/
+    owner: root
+    group: operator
+    mode: 0644
+    force: yes
+
+- name: Deploy /etc/doas.conf
+  template:
+    src: doas.conf
+    dest: /etc/
+    owner: root
+    group: wheel
+    mode: 0644
+
+- name: /etc/login.conf deployed
+  template:
+    src: login.conf
+    dest: /etc/
+    owner: root
+    group: wheel
+    mode: 0644
+
+- name: Deploy /etc/ssh/sshd_config
+  template:
+    src: sshd_config
+    dest: /etc/ssh/sshd_config
+    owner: root
+    group: wheel
+    mode: 0644
+
+- name: Fail if services_address is not defined
+  fail:
+    msg: "{{ item }} is not defined, this is needed to determine proper bind IP"
+  when:
+    - item is not defined
+  with_items:
+    - services_address
+
+- name: hostname.lo100 for local services interface
+  template:
+    src: hostname.lo100
+    dest: /etc/
+    owner: root
+    group: wheel
+    mode: 0640
+    backup: no
+
+- name: lo100 up
+  shell: sh /etc/netstart lo100
+  ignore_errors: true
+  changed_when: false
+  check_mode: no
+
+- name: ntpd.conf deployed
+  template:
+    src: ntpd.conf
+    dest: /etc
+    owner: root
+    group: wheel
+    mode: 0644
+
+- name: pkg_add update added to cron
+  cron:
+    name: pkg-update-cron
+    minute: "~"
+    hour: "{{ range(0, 24) | random }}"
+    job: /usr/sbin/pkg_add -Uu
+    user: root
+
+- name: syspatch check added to cron
+  cron:
+    name: syspatch-cron
+    minute: "~"
+    hour: "{{ range(0, 24) | random }}"
+    job: /usr/sbin/syspatch -c
+    user: root
+
+- name: pf filter statistics and counters added to cron
+  cron:
+    name: pfctl-cron
+    minute: "~"
+    hour: "{{ range(0, 24) | random }}"
+    job: /sbin/pfctl -s info
+    user: root
+
+- name: netstat check added to cron
+  cron:
+    name: netstat-cron
+    minute: "~"
+    hour: "~"
+    job: /usr/bin/netstat -l -p tcp && /usr/bin/netstat -l -p udp
+    user: root
+
+- name: /etc/rc.local deployed
+  template:
+    src: rc.local
+    dest: /etc/
+    owner: root
+    group: wheel
+    mode: 0644
+    backup: no
+
+- name: /etc/rc.shutdown deployed
+  template:
+    src: rc.shutdown
+    dest: /etc/
+    owner: root
+    group: wheel
+    mode: 0644
+    backup: no

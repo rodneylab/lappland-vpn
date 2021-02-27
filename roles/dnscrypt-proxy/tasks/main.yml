@@ -1,0 +1,78 @@
+---
+- name: dnscrypt-proxy package installed
+  community.general.openbsd_pkg:
+    name: dnscrypt-proxy
+    state: present
+
+- name: dnscrypt-proxy directory created
+  file:
+    path: /etc/dnscrypt-proxy
+    owner: root
+    group: wheel
+    state: directory
+    mode: 0755
+
+- name: dnscrypt-peroxy config files deployed
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: wheel
+    mode: 0644
+    backup: yes
+  with_items:
+    - { src: 'dnscrypt-proxy.toml', dest: '/etc/dnscrypt-proxy.toml'}
+    - { src: 'ip-blacklist.txt', dest: '/etc/dnscrypt-proxy/ip-blacklist.txt'}
+    - { src: 'whitelist.txt', dest: '/etc/dnscrypt-proxy/whitelist.txt'}
+
+- name: Deploy dnscrypt-proxy-blacklist.sh
+  template:
+    src: dnscrypt-proxy-blacklist.sh
+    dest: /etc/dnscrypt-proxy/dnscrypt-proxy-blacklist.sh
+    owner: root
+    group: wheel
+    mode: 0750
+    backup: no
+
+- name: dnscrypt-proxy blacklist downloaded
+  get_url:
+    url: https://download.dnscrypt.info/blacklists/domains/mybase.txt
+    dest: /etc/dnscrypt-proxy/blacklist.txt
+    mode: '0644'
+
+- name: dnscrypt-blacklist script added to cron
+  cron:
+    name: dnscrypt-blacklist update
+    minute: "~"
+    hour: "{{ range(0, 24) | random }}"
+    job: "/bin/sh /etc/dnscrypt-proxy/dnscrypt-proxy-blacklist.sh"
+    user: root
+
+- name: dnscrypt-proxy log folder created
+  file:
+    path: /var/log/dnscrypt-proxy
+    owner: root
+    group: wheel
+    state: directory
+    mode: 0755
+
+- name: dnscrypt-proxy log file created
+  copy:
+    content: ""
+    dest: "{{ item }}"
+    force: no
+    owner: root
+    group: wheel
+    mode: 0644
+  with_items:
+    - /var/log/dnscrypt-proxy/dnscrypt-proxy.log
+    - /var/log/dnscrypt-proxy/nx.log
+    - /var/log/dnscrypt-proxy/blocked.log
+  notify:
+    - start dnscrypt-proxy
+
+- name: dnscrypt-proxy is started and enabled
+  service:
+    name: dnscrypt_proxy
+    state: restarted
+    enabled: yes

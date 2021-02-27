@@ -1,0 +1,80 @@
+---
+- name: Admins group created
+  group:
+    name: admins
+    state: present
+
+- name: Admin user created
+  user:
+    name: "{{ admin_account }}"
+    group: admins
+    home: /home/{{ admin_account }}
+    shell: /bin/ksh
+
+- name: Admin's .ssh folder created
+  file:
+    path: /home/{{ admin_account }}/.ssh
+    owner: "{{ admin_account }}"
+    group: admins
+    state: directory
+    mode: 0700
+
+- name: Admin SSH public key added
+  lineinfile:
+    path: /home/{{ admin_account }}/.ssh/authorized_keys
+    owner: "{{ admin_account }}"
+    group: admins
+    mode: 0600
+    line: "{{ admin_ssh_public_key }}"
+    create: yes
+
+- name: Admin's ssh config file deployed
+  template:
+    src: config
+    dest: /home/{{ admin_account }}/.ssh/
+    owner: "{{ admin_account }}"
+    group: admins
+    mode: 0600
+    backup: no
+
+- name: Admin's .gnupg folder created
+  file:
+    path: /home/{{ admin_account }}/.gnupg
+    owner: "{{ admin_account }}"
+    group: admins
+    state: directory
+    mode: 0700
+
+- name: Admin's default config files added
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ admin_account }}"
+    group: admins
+    mode: 0644
+    backup: yes
+  with_items:
+    - { src: '.bash_profile', dest: '/home/{{ admin_account }}/.bash_profile'}
+    - { src: '.bashrc', dest: '/home/{{ admin_account }}/.bashrc'}
+    - { src: '.cshrc', dest: '/home/{{ admin_account }}/.cshrc'}
+    - { src: '.curlrc', dest: '/home/{{ admin_account }}/.curlrc'}
+    - { src: '.profile', dest: '/home/{{ admin_account }}/.profile'}
+    - { src: 'gpg.conf', dest: '/home/{{ admin_account }}/.gnupg/gpg.conf'}
+    - { src: '.gitconfig', dest: '/home/{{ admin_account }}/.gitconfig'}
+    - { src: '.vimrc', dest: '/home/{{ admin_account }}/.vimrc'}
+    - { src: '.wgetrc', dest: '/home/{{ admin_account }}/.wgetrc'}
+
+- name: Root's default config files added
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: wheel
+    mode: 0644
+    backup: yes
+  with_items:
+    - { src: '.bash_profile', dest: '/root/.bash_profile'}
+    - { src: '.bashrc_root', dest: '/root/.bashrc'}
+    - { src: '.curlrc', dest: '/root/.curlrc'}
+    - { src: '.gitconfig', dest: '/root/.gitconfig'}
+    - { src: '.wgetrc', dest: '/root/.wgetrc'}

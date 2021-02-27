@@ -1,0 +1,7 @@
+# This is Git's per-user configuration file.
+[transfer]
+        fsckObjects = true
+[receive]
+        fsckObjects = true
+[fetch]
+        fsckObjects = true

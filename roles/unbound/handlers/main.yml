@@ -1,0 +1,14 @@
+- name: enable unbound
+  service:
+    name: unbound
+    enabled: yes
+
+- name: start unbound
+  service:
+    name: unbound
+    state: started
+
+- name: restart unbound
+  service:
+    name: unbound
+    state: restarted

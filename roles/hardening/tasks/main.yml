@@ -1,0 +1,31 @@
+---
+- name: Compiler permissions hardened
+  file:
+    path: "{{ item }}"
+    state: file
+    mode: '0754'
+  with_items:
+    - /usr/bin/as
+    - /usr/bin/cc
+    - /usr/bin/clang
+    - /usr/bin/gcc
+    - /usr/bin/g++
+    - /usr/local/bin/cargo
+    - /usr/local/bin/rustc
+      /usr/local/go/bin/go
+
+- name: Accounting enabled
+  shell: "/usr/sbin/rcctl enable accounting"
+
+- name : /usr/local/sbin added to mtree
+  shell: "/usr/sbin/mtree -cx -p /usr/local/sbin -K sha256digest,type > /etc/mtree/usr.local.sbin.secure"
+  changed_when: false
+  check_mode: no
+
+- name: custom mtree file permissions hardened
+  file:
+    path: /etc/mtree/usr.local.sbin.secure
+    state: touch
+    owner: root
+    group: wheel
+    mode: '0600'

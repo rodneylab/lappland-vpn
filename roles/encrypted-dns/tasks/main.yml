@@ -1,0 +1,129 @@
+---
+- name: Packages needed to build dnscrypt-wrapper installed
+  community.general.openbsd_pkg:
+    name:
+      - gmake
+      - autoconf--
+      - libsodium
+      - libevent
+    state: present
+
+- name: build-dnscrypt-wrapper.sh deployed
+  template:
+    src: build-dnscrypt-wrapper.sh
+    dest: /root/
+    owner: root
+    group: wheel
+    mode: 0640
+    backup: no
+
+- name: dnscrypt-wrapper built
+  shell: "sh /root/build-dnscrypt-wrapper.sh"
+  changed_when: false
+  check_mode: no
+
+- name: dnscrypt-wrapper folders created
+  file:
+    path: "{{ item }}"
+    owner: root
+    group: wheel
+    state: directory
+    mode: 0700
+  with_items:
+    - /etc/dnscrypt-wrapper
+    - /etc/dnscrypt-wrapper/keys
+    - /etc/dnscrypt-wrapper/keys/short-term
+    - /etc/dnscrypt-wrapper/lists
+
+- name: dnscrypt-wrapper-keygen.sh deployed
+  template:
+    src: dnscrypt-wrapper-keygen.sh
+    dest: /root/
+    owner: root
+    group: wheel
+    mode: 0640
+    backup: no
+
+- name: dnscrypt-wrapper keys generated
+  shell: "sh /root/dnscrypt-wrapper-keygen.sh"
+  changed_when: false
+  check_mode: no
+
+- name: dnscrypt-wrapper scripts deployed
+  template:
+    src: "{{ item }}"
+    dest: /etc/dnscrypt-wrapper/
+    owner: root
+    group: wheel
+    mode: 0750
+    backup: no
+  with_items:
+    - dnscrypt-wrapper-functions.sh
+    - stop-dnscrypt-wrapper.sh
+
+- name: Rust environment installed
+  community.general.openbsd_pkg:
+    name: rust
+    state: present
+
+- name: encrypted-dns-server built
+  # shell: cargo install --version 0.3.19 encrypted-dns
+  shell: cargo install encrypted-dns
+
+- name: encrypted-dns-server stripped
+  shell: strip /root/.cargo/bin/encrypted-dns
+
+- name: encrypted-dns-server installed
+  copy:
+    src: /root/.cargo/bin/encrypted-dns
+    dest: /usr/local/sbin/encrypted-dns
+    mode: '0755'
+    remote_src: yes
+
+- name: encrypted-dns folder created
+  file:
+    path: /etc/encrypted-dns
+    owner: root
+    group: wheel
+    state: directory
+    mode: 0750
+
+- name: encrypted-dns config deployed
+  template:
+    src: encrypted-dns.toml
+    dest: /etc/encrypted-dns
+    owner: root
+    group: wheel
+    mode: 0640
+    backup: no
+
+- name: encrypted-dns-restart script deployed
+  template:
+    src: encrypted-dns-restart.sh
+    dest: /etc/encrypted-dns
+    owner: root
+    group: wheel
+    mode: 0750
+    backup: no
+
+- name: encrypted-dns-restart script added to cron
+  cron:
+    name: encrypted-dns restart
+    minute: "~"
+    hour: "{{ range(0, 24) | random }}"
+    job: "/bin/sh /etc/encrypted-dns/encrypted-dns-restart.sh"
+    user: root
+
+- name: encrypted-dns log folder created
+  file:
+    path: /var/log/encrypted-dns
+    owner: root
+    group: wheel
+    state: directory
+    mode: 0755
+
+- name: dnscrypt-wrapper stopped
+  shell: sh /etc/dnscrypt-wrapper/stop-dnscrypt-wrapper.sh
+
+- name: encrypted-dns started
+  shell: /usr/local/sbin/encrypted-dns --import-from-dnscrypt-wrapper /etc/dnscrypt-wrapper/keys/secret.key --config /etc/encrypted-dns/encrypted-dns.toml &

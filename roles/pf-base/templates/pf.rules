@@ -1,0 +1,56 @@
+## Ports
+ssh_port = "{{ ssh_port }}"
+public_tcp_ports = \
+  "{ 53, 443, 80, 43, 22, 993, 465, 853, 2083, 2096, 5223, 1551, 9600, 587, 5432 }"
+public_udp_ports = "{ 53, 51820, 8443, 3478, 443, 123 }"
+
+# Tables
+table <blocklist> persist file "/etc/pf/blocklist"
+
+# Options
+set block-policy drop
+set fingerprints "/etc/pf.os"
+set optimization normal
+set limit { states 30000, table-entries 250000 }
+set state-policy if-bound
+set ruleset-optimization basic
+set skip on lo0
+
+
+# Normalisation
+match in all scrub (no-df random-id max-mss 1420)
+
+# Queuing
+
+# Translation
+
+# Filtering
+block drop in log quick from no-route to any
+block drop in log quick from urpf-failed label uRPF
+block log quick from any to lo0:network
+block in log quick on egress from any to <martians>
+block return out log on egress from any to <martians>
+block drop log on egress
+block log quick from any to <blocklist>
+antispoof log quick for egress
+block drop in log quick inet from any to localhost
+
+# block stateless IPv4 traffic
+block return log inet all
+
+# ddos reset block
+pass in log proto tcp from any to any flags R/R \
+  modulate state (max-src-conn-rate 2/1)
+
+# ssh block
+block in log quick proto tcp from <brutes> to any label BRUTES_FROM_EXTERNAL
+
+pass out quick on egress proto tcp from egress:0 to any port $public_tcp_ports
+pass out quick on egress proto udp from egress:0 to any port $public_udp_ports
+pass in on egress tcp to egress:0 port $ssh_port flags S/SA modulate state \
+  (max-src-conn 5, max-src-conn-rate 5/60, overload <brutes> flush global)
+
+pass out on egress proto udp from egress:0 port 67:68 \
+  to 169.254.169.254 port 67:68
+
+block drop log quick proto tcp from any to any flags R/R

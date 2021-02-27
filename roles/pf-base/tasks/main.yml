@@ -1,0 +1,129 @@
+---
+- name: pf.anchors dir created
+  file:
+    path: /etc/pf.anchors
+    owner: root
+    group: wheel
+    state: directory
+    mode: 0700
+
+- name: pf.rules deployed
+  template:
+    src: pf.rules
+    dest: /etc/pf.anchors/
+    owner: root
+    group: wheel
+    mode: 0600
+    backup: no
+
+- name: pf.rules added to /etc/changelist
+  lineinfile:
+    backup: yes
+    path: /etc/changelist
+    line: /etc/pf.anchors/pf.rules
+
+- name: pf directory created
+  file:
+    path: /etc/pf
+    owner: root
+    group: wheel
+    state: directory
+    mode: 0700
+
+- name: martians deployed
+  template:
+    src: martians
+    dest: /etc/pf/
+    owner: root
+    group: wheel
+    mode: 0600
+    backup: no
+
+- name: blocklist deployed
+  template:
+    src: blocklist
+    dest: /etc/pf/
+    owner: root
+    group: wheel
+    mode: 0600
+    backup: no
+
+- name: zones deployed
+  template:
+    src: zones
+    dest: /etc/pf/
+    owner: root
+    group: wheel
+    mode: 0600
+    backup: no
+
+- name: pf list directories created
+  file:
+    path: "{{ item }}"
+    owner: root
+    group: wheel
+    state: directory
+    mode: 0700
+  with_items:
+    - /etc/pf/asns
+    - /etc/pf/block-asns
+    - /etc/pf/output
+
+- name: block-asns files deployed
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ admin_account }}"
+    group: wheel
+    mode: 0640
+    backup: yes
+  with_items:
+    - { src: 'myspace', dest: '/etc/pf/block-asns/myspace'}
+
+- name: asns files deployed
+  template:
+    src: "{{ item }}"
+    dest: /etc/pf/asns/
+    owner: "{{ admin_account }}"
+    group: wheel
+    mode: 0640
+    backup: yes
+  with_items:
+    - 'aws'
+    - 'cloudflare'
+    - 'google'
+    - 'netflix'
+
+- name: pf-tables script deployed
+  template:
+    src: pf-tables.sh
+    dest: /etc/pf/
+    owner: "{{ admin_account }}"
+    group: admins
+    mode: 0755
+    backup: no
+
+- name: pf.conf deployed
+  template:
+    src: pf.conf
+    dest: /etc/
+    owner: root
+    group: wheel
+    mode: 0600
+    backup: no
+  notify:
+    - restart pf
+
+- name: blocklist updated
+  shell: "sh /etc/pf/pf-tables.sh"
+  changed_when: false
+  check_mode: no
+
+- name: pf-tables script added to cron
+  cron:
+    name: pf-tables update
+    minute: "~"
+    hour: "{{ range(0, 24) | random }}"
+    weekday: "{{ range(0, 6) | random }}"
+    job: "/bin/sh /etc/pf/pf-tables.sh"
+    user: root
