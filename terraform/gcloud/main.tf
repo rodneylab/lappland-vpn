@@ -66,7 +66,7 @@ data "google_compute_regions" "available" {
 #   ip_cidr_range = "10.36.${count.index}.0/24"
 #   network       = "my-network"
 #   region        = data.google_compute_regions.available.names[count.index]
-}
+# }
 
 provider "google" {
   region = data.google_compute_regions.available.names[count.index]
@@ -128,7 +128,7 @@ resource "google_compute_instance" "instance_with_ip" {
   }
 
   metadata = {
-    ssh-keys = var.ssh_key
+    ssh-keys    = var.ssh_key
     lappland-id = var.lappland_id
   }
 
