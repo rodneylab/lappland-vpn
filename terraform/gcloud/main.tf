@@ -3,7 +3,6 @@ variable "image" {}
 variable "image_name" {}
 variable "image_family" { default = "openbsd-amd64-68" }
 variable "lappland_id" { default = "lappland" }
-variable "lappland_id" { default = "lappland" }
 variable "project_id" {}
 variable "region" {}
 variable "server_name" {}
@@ -49,10 +48,16 @@ resource "google_storage_bucket_object" "lappand-vpn-image" {
   bucket = var.bucket
 }
 
-resource "google_compute_image" "lappand-vpn-image" {
-  name = "openbsd-amd64-68-201107"
+# data "google_compute_image" "lappland_vpn_image" {
+#   family  = var.image_family
+#   project = var.project_id
+# }
+
+resource "google_compute_image" "lappland_vpn_image" {
+  # name        = "openbsd-amd64-68-201107"
+  # source_disk = "gs://${var.bucket}/${var.image_name}"
   raw_disk {
-    source = "https://storage.googleapis.com/${var.bucket}/${var.image_name}"
+    source = "gs://${var.bucket}/${var.image_name}"
     # sha1 = "003b5dca54c0931480a5e055659140b94cf87d76" hash bedfore extracting
   }
   family  = var.image_family
@@ -83,7 +88,7 @@ resource "google_compute_firewall" "default" {
   name          = "lapplandvpn"
   network       = "lappland"
   direction     = "INGRESS"
-  source_ranges = var.firewall_select_source
+  source_ranges = split(",", var.firewall_select_source)
   allow {
     protocol = "tcp"
     ports    = [var.ssh_port]
@@ -99,17 +104,29 @@ resource "google_compute_address" "static" {
   name = var.server_name
 }
 
-data "google_compute_image" "openbsd_iamge" {
-  family = var.image_family
-}
+# data "google_compute_image" "openbsd_image" {
+#   family = var.image_family
+# }
 
 
 resource "google_project" "project" {
+  name       = "lappland-vpn"
   project_id = var.project_id
 }
 
+resource "google_project_service" "service" {
+  for_each = toset([
+    "compute.googleapis.com"
+  ])
+
+  service = each.key
+
+  project            = var.project_id
+  disable_on_destroy = false
+}
+
 data "google_compute_zones" "available" {
-  project = google_project.project.project_id
+  project = var.project_id
 }
 
 resource "random_shuffle" "zones" {
@@ -117,7 +134,7 @@ resource "random_shuffle" "zones" {
   result_count = 2
 }
 
-resource "google_compute_instance" "instance_with_ip" {
+resource "google_compute_instance" "lappland_vpn" {
   name         = var.server_name
   zone         = random_shuffle.zones.result[0]
   machine_type = "f1-micro"
@@ -125,7 +142,7 @@ resource "google_compute_instance" "instance_with_ip" {
 
   boot_disk {
     initialize_params {
-      image = data.google_compute_image.openbsd_image.self_link
+      image = google_compute_image.lappland_vpn_image.self_link
     }
   }
 
@@ -137,8 +154,8 @@ resource "google_compute_instance" "instance_with_ip" {
   network_interface {
     network = google_compute_network.vpc_network.name
     access_config {
-      nat_ip       = google_compute_address.static.address
-      type         = "ONE_TO_ONE_NAT"
+      nat_ip = google_compute_address.static.address
+      # type         = "ONE_TO_ONE_NAT"
       network_tier = "PREMIUM"
     }
   }
@@ -146,7 +163,7 @@ resource "google_compute_instance" "instance_with_ip" {
 }
 
 output "instance_id" {
-  value = google_compute_instance.default.self_link
+  value = google_compute_instance.lappland_vpn.self_link
 }
 
 output "image_hash" {
