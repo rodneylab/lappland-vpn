@@ -1,1 +1,4 @@
-{ ssh_port: 1551, wg_port: 51820, admin_account: lappland }
+admin_account: lappland
+gcloud: {region: us-west1}
+ssh_port: 1551
+wg_port: 51820

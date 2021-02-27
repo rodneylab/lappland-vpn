@@ -73,6 +73,9 @@ def main():
     if 'firewall_select_source' in parameters:
         firewall_select_source = parameters['firewall_select_source']
 
+    if 'gcloud' in parameters:
+        region = parameters['gcloud']['region']
+
     env_copy['LAPPLAND_ADMIN'] = admin_account
     command = ['sh', 'generate-ssh-keys.sh', get_ssh_key_name()]
     subprocess.check_call(command, env=env_copy)
@@ -83,6 +86,8 @@ def main():
     env_copy['TF_VAR_image_family'] = 'openbsd-amd64-68'
 
     env_copy['TF_VAR_bucket'] = 'lappland-openbsd-images-' + get_date_string()
+    env_copy['TF_VAR_project_id'] = os.getenv('PROJECT_ID')
+    env_copy['TF_VAR_region'] = region
     env_copy['TF_VAR_server_name'] = server_name
     env_copy['TF_VAR_ssh_port'] = str(parameters['ssh_port'])
     env_copy['TF_VAR_wg_port'] = str(parameters['wg_port'])
@@ -102,5 +107,7 @@ def main():
 # terraform output -json regions > jq -r
 # file is [ "asia-east1", "asia-east2", ..., "us-west4"]
 # see https://cloud.google.com/compute/docs/regions-zones for name to description mapping
+
+
 if __name__ == "__main__":
     main()

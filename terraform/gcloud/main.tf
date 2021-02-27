@@ -3,6 +3,8 @@ variable "image" {}
 variable "image_name" {}
 variable "image_family" { default = "openbsd-amd64-68" }
 variable "lappland_id" { default = "lappland" }
+variable "lappland_id" { default = "lappland" }
+variable "project_id" {}
 variable "region" {}
 variable "server_name" {}
 variable "ssh_key" {}
@@ -57,8 +59,8 @@ resource "google_compute_image" "lappand-vpn-image" {
   project = var.project_id
 }
 
-data "google_compute_regions" "available" {
-}
+# data "google_compute_regions" "available" {
+# }
 
 # resource "google_compute_subnetwork" "cluster" {
 #   count         = length(data.google_compute_regions.available.names)
@@ -68,9 +70,9 @@ data "google_compute_regions" "available" {
 #   region        = data.google_compute_regions.available.names[count.index]
 # }
 
-provider "google" {
-  region = data.google_compute_regions.available.names[count.index]
-}
+# provider "google" {
+#   region = data.google_compute_regions.available.names[count.index]
+# }
 
 resource "google_compute_network" "vpc_network" {
   name         = "lappland"
