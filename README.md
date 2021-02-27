@@ -38,8 +38,6 @@ python3 -m virtualenv --python="$(command -v python3)" .env && \
 4. Run installer
 ```bash
 sh lappland.sh
-  #statements
-done
 ```
 
 
