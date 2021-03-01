@@ -12,7 +12,7 @@
     - /usr/bin/g++
     - /usr/local/bin/cargo
     - /usr/local/bin/rustc
-      /usr/local/go/bin/go
+    - /usr/local/go/bin/go
 
 - name: Accounting enabled
   shell: "/usr/sbin/rcctl enable accounting"
