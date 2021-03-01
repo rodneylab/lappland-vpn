@@ -131,7 +131,7 @@ data "google_compute_zones" "available" {
 
 resource "random_shuffle" "zones" {
   input        = data.google_compute_zones.available.names
-  result_count = 2
+  result_count = 1
 }
 
 resource "google_compute_instance" "lappland_vpn" {

@@ -85,7 +85,7 @@ def main():
     env_copy['TF_VAR_image_name'] = 'openbsd-amd64-68-210227.tar.gz'
     env_copy['TF_VAR_image_family'] = 'openbsd-amd64-68'
 
-    env_copy['TF_VAR_bucket'] = 'lappland-openbsd-images-' + get_date_string()
+    env_copy['TF_VAR_bucket'] = 'lappland-openbsd-images-2021-02-27'
     env_copy['TF_VAR_project_id'] = os.getenv('GOOGLE_PROJECT')
     env_copy['TF_VAR_region'] = region
     env_copy['TF_VAR_server_name'] = server_name
@@ -98,8 +98,14 @@ def main():
 
     with set_directory(Path('./terraform/gcloud')):
         subprocess.check_call(['terraform', 'init'], env=env_copy)
+        with open('../../terraform-plan.log', 'w') as fout:
+            subprocess.check_call(
+                ['terraform', 'plan'], stdout=fout, env=env_copy)
+
         subprocess.check_call(['terraform', 'apply'], env=env_copy)
-        subprocess.check_call(['terraform', 'show'])
+        with open('../../terraform-output.json', 'w') as fout:
+            subprocess.check_call(
+                ['terraform', 'output'], stdout=fout, env=env_copy)
 #
 # in regions folder
 # terraform init
