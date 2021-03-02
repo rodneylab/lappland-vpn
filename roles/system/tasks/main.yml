@@ -1,11 +1,11 @@
 ---
 - name: All packages on the system updated
-  community.general.openbsd_pkg:
+  openbsd_pkg:
     name: '*'
     state: latest
 
 - name: System packages installed
-  community.general.openbsd_pkg:
+  openbsd_pkg:
     name:
       - bash
       - git

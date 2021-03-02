@@ -1,6 +1,6 @@
 ---
 - name: dnscrypt-proxy package installed
-  community.general.openbsd_pkg:
+  openbsd_pkg:
     name: dnscrypt-proxy
     state: present
 

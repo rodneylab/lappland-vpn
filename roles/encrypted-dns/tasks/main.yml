@@ -1,6 +1,6 @@
 ---
 - name: Packages needed to build dnscrypt-wrapper installed
-  community.general.openbsd_pkg:
+  openbsd_pkg:
     name:
       - gmake
       - autoconf--
