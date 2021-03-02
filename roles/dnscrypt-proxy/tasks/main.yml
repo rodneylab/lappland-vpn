@@ -12,7 +12,7 @@
     state: directory
     mode: 0755
 
-- name: dnscrypt-peroxy config files deployed
+- name: dnscrypt-proxy config files deployed
   template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"

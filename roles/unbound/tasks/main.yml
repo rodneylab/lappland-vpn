@@ -1,15 +1,4 @@
 ---
-- name: unbound enabled
-  shell: "rcctl enable unbound"
-  changed_when: false
-  check_mode: no
-
-- name: unbound started
-  shell: "rcctl start unbound"
-  register: unbound_start_cmd
-  failed_when: unbound_start_cmd.rc >= 1
-  check_mode: no
-
 - name: unbound config deployed
   template:
     src: unbound.conf
@@ -20,6 +9,17 @@
     backup: yes
   notify:
     - enable unbound
+
+- name: unbound enabled
+  shell: "rcctl enable unbound"
+  changed_when: false
+  check_mode: no
+
+- name: unbound started
+  shell: "rcctl start unbound"
+  register: unbound_start_cmd
+  failed_when: unbound_start_cmd.rc >= 1
+  check_mode: no
 
 - name: unbound log folder created
   file:
