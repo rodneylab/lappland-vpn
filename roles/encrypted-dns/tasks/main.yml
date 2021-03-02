@@ -62,7 +62,7 @@
     - stop-dnscrypt-wrapper.sh
 
 - name: Rust environment installed
-  community.general.openbsd_pkg:
+  openbsd_pkg:
     name: rust
     state: present
 
