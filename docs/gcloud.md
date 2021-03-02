@@ -22,12 +22,12 @@ gcloud iam service-accounts create lappland-vpn --display-name "Lappland VPN"
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
   --member user:<your-gcloud-account> \
   --role roles/iam.serviceAccountAdmin
-$ gcloud iam service-accounts keys create ${CREDENTIALS} \
+gcloud iam service-accounts keys create ${CREDENTIALS} \
   --iam-account lappland-vpn@${PROJECT_ID}.iam.gserviceaccount.com
-$ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
   --member serviceAccount:lappland-vpn@${PROJECT_ID}.iam.gserviceaccount.com \
   --role roles/compute.admin
-$ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
   --member serviceAccount:lappland-vpn@{PROJECT_ID} \
   iam.gserviceaccount.com \
   --role roles/iam.serviceAccountUser
