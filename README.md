@@ -15,7 +15,7 @@ git clone https://github.com/rodneylab/lappland-vpn.git
 2. Install core dependencies:
 - OpenBSD
 ```bash
-pkg_add terraform python py3-pip
+pkg_add jq python py3-pip terraform
 ln -sf /usr/local/bin/bin/pip3 /usr/local/bin/pip
 pip install --user --upgrade virtualenv
 ```
