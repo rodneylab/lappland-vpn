@@ -59,7 +59,7 @@ start_new_wrapper() {
   echo $(date +'%Y-%m-%d %H:%M:%S') new wrapper starting >> $LOGFILE
   exec /usr/local/sbin/dnscrypt-wrapper \
 	--daemonize \
-	--listen-address={{ unbound_address }}:443 \
+	--listen-address={{ services_address }}:443 \
 		--resolver-address=127.0.0.1:53 \
 	--provider-name="$provider_name" \
 	--provider-cert-file="$(stcerts_files)" \
