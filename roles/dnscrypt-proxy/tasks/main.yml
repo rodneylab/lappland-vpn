@@ -56,7 +56,7 @@
     state: directory
     mode: 0755
 
-- name: dnscrypt-proxy log file created
+- name: dnscrypt-proxy log files created
   copy:
     content: ""
     dest: "{{ item }}"
