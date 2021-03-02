@@ -25,6 +25,11 @@ terraform {
   }
 }
 
+provider "google" {
+  project = var.project_id
+  region  = var.region
+}
+
 resource "google_compute_image" "lappland_vpn_image" {
   name = var.image_name
   raw_disk {
@@ -42,7 +47,7 @@ resource "google_compute_network" "vpc_network" {
 
 resource "google_compute_firewall" "default" {
   name          = "lapplandvpn"
-  network       = "lappland"
+  network       = google_compute_network.vpc_network.name
   direction     = "INGRESS"
   source_ranges = split(",", var.firewall_select_source)
   allow {
@@ -110,8 +115,4 @@ resource "google_compute_instance" "lappland_vpn" {
 
 output "instance_id" {
   value = google_compute_instance.lappland_vpn.self_link
-}
-
-output "image_hash" {
-  value = google_storage_bucket_object.lappand-vpn-image.md5hash
 }
