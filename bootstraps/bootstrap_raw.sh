@@ -21,5 +21,5 @@ if [ -d "/root/git/lappland-vpn" ]
 then
   cd "/root/git/lappland-vpn" && /usr/local/bin/git pull --rebase
 else
-  /usr/local/bin/git clone "git@github.com:rodneylab/lappland-vpn.git"
+  /usr/local/bin/git clone "https://github.com/rodneylab/lappland-vpn.git"
 fi
