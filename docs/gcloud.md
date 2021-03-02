@@ -38,3 +38,27 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
 ```bash
 gcloud services enable compute.googleapis.com
 ```
+
+### Create a bucket for the image and upload it:
+```bash
+BUCKET="gs://lappland-openbsd-images-YYYY-MM-DD"
+gcloud projects list
+gsutil mb -b on -l ${REGION} -p ${PROJECT_ID} ${BUCKET}
+IMAGE_HASH=$(openssl dgst -md5 -binary openbsd-amd64-68-201107.tar.gz | openssl enc -base64)
+gsutil -h Content-MD5:${IMAGE_HASH} \
+    cp openbsd-amd64-68-201107.tar.gz \
+    ${BUCKET}/openbsd-amd64-68-201107.tar.gz
+gcloud compute images create openbsd-amd64-68-201107 \
+    --source-uri ${BUCKET}/openbsd-amd64-68-201107.tar.gz \
+    --family openbsd-amd64-68 --project ${PROJECT_ID}
+gcloud compute images list --no-standard-images --project ${PROJECT_ID}
+```
+
+If there was an error while uploading, get list of remote files with:
+```bash
+gsutil ls ${BUCKET}
+```
+### Grant service account permission to pull image from the bucket:
+```bash
+gsutil iam ch serviceAccount:lappland-vpn@${PROJECT_ID}.iam.gserviceaccount.com:objectViewer ${BUCKET}
+```
