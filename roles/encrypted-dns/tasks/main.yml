@@ -67,7 +67,7 @@
     state: present
 
 - name: encrypted-dns-server built
-  # shell: cargo install --version 0.3.19 encrypted-dns
+  # shell: cargo install --version 0.3.23 encrypted-dns
   shell: cargo install encrypted-dns
 
 - name: encrypted-dns-server stripped
