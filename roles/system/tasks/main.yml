@@ -13,7 +13,7 @@
       - wget
     state: present
 
-- name: Deploy /etc/motd
+- name: /etc/motd deployed
   template:
     src: motd
     dest: /etc/
@@ -22,7 +22,7 @@
     mode: 0644
     force: yes
 
-- name: Deploy /etc/doas.conf
+- name: /etc/doas.conf deployed
   template:
     src: doas.conf
     dest: /etc/
@@ -38,7 +38,7 @@
     group: wheel
     mode: 0644
 
-- name: Deploy /etc/ssh/sshd_config
+- name: /etc/ssh/sshd_config deployed
   template:
     src: sshd_config
     dest: /etc/ssh/sshd_config
@@ -63,7 +63,7 @@
     mode: 0640
     backup: no
 
-- name: lo100 up
+- name: lo100 interface brought up
   shell: sh /etc/netstart lo100
   ignore_errors: true
   changed_when: false
