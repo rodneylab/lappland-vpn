@@ -67,6 +67,7 @@ resource "google_compute_address" "static" {
 
 resource "google_project_service" "service" {
   for_each = toset([
+    "cloudresourcemanager.googleapis.com"
     "compute.googleapis.com"
   ])
 
