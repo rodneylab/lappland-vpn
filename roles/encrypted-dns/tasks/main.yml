@@ -3,7 +3,7 @@
   openbsd_pkg:
     name:
       - gmake
-      - autoconf--
+      - autoconf-2.69p3
       - libsodium
       - libevent
     state: present
