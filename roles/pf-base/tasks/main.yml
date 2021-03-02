@@ -1,5 +1,5 @@
 ---
-- name: pf.anchors dir created
+- name: pf.anchors directory created
   file:
     path: /etc/pf.anchors
     owner: root
