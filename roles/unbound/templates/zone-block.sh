@@ -1,12 +1,12 @@
 #!/bin/sh
-TEMP_FILE="/var/unbound/etc/unbound_hosts.conf."$(date +"%Y%m%d")
+TEMP_FILE="/var/unbound/etc/zone-block-general.conf."$(date +"%Y%m%d")
 url=https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling-porn/hosts
 whitelist=/var/unbound/etc/whitelist.txt
 
-if [ ! -f "/var/unbound/etc/unbound_hosts.conf" ]; then
-    touch /var/unbound/etc/unbound_hosts.conf
-    chown root:wheel /var/unbound/etc/unbound_hosts.conf
-    chmod 644 /var/unbound/etc/unbound_hosts.conf
+if [ ! -f "/var/unbound/etc/zone-block-general.conf" ]; then
+    touch /var/unbound/etc/zone-block-general.conf
+    chown root:wheel /var/unbound/etc/zone-block-general.conf
+    chmod 644 /var/unbound/etc/zone-block-general.conf
 fi
 
 /usr/local/bin/curl --ssl-reqd $url | grep '^0\.0\.0\.0' | awk \
@@ -22,6 +22,6 @@ for host in $(cat $whitelist); do
   sed -i '/'"$(echo $host)"'/s/^/#/' $TEMP_FILE
 done
 
-cp $TEMP_FILE /var/unbound/etc/unbound_hosts.conf
+cp $TEMP_FILE /var/unbound/etc/zone-block-general.conf
 /usr/sbin/rcctl reload unbound
 rm $TEMP_FILE 2>/dev/null

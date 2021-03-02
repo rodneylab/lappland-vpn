@@ -84,7 +84,7 @@
     mode: 0750
     backup: no
 
-- name: zone-block-general.conf
+- name: zone-block-general.conf run
   shell: "sh /var/unbound/etc/zone-block.sh"
   changed_when: false
   check_mode: no
