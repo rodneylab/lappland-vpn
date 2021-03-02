@@ -35,6 +35,7 @@ lappland_id=$(/usr/local/bin/curl -s \
   -H "Metadata-Flavor: Google" \
   http://metadata.google.internal/computeMetadata/v1/instance/attributes/lappland-id)
 if [ "$lappland_id" == "" ]
+then
     lappland_id=lappland
 fi
 
@@ -64,7 +65,7 @@ extra_vars=$( /usr/local/bin/jq -n \
 )
 
 # Run playbook
-cd /root/git/lappland-ansible-deploy/ && /usr/local/bin/ansible-playbook \
+cd /root/git/lappland-vpn/ && /usr/local/bin/ansible-playbook \
   install.yml \
   --tag=users,system,sysctl,pf-base,dnscrypt-proxy,unbound,encrypted-dns,hardening,reboot \
   --extra-vars="$extra_vars" 2>&1 | tee -a /var/log/bootstrap
