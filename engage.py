@@ -81,8 +81,9 @@ def main():
     subprocess.check_call(command, env=env_copy)
 
     # prompt for image path
-    env_copy['TF_VAR_image'] = '../openbsd-amd64-68-210227.tar.gz'
-    env_copy['TF_VAR_image_name'] = 'openbsd-amd64-68-210227.tar.gz'
+    env_copy['TF_VAR_image'] = '../../../../openbsd-amd64-68-210227.tar.gz'
+    env_copy['TF_VAR_image_name'] = 'openbsd-amd64-68-210227'
+    env_copy['TF_VAR_image_file'] = 'openbsd-amd64-68-210227.tar.gz'
     env_copy['TF_VAR_image_family'] = 'openbsd-amd64-68'
 
     env_copy['TF_VAR_bucket'] = 'lappland-openbsd-images-2021-02-27'
@@ -105,14 +106,7 @@ def main():
         subprocess.check_call(['terraform', 'apply'], env=env_copy)
         with open('../../terraform-output.json', 'w') as fout:
             subprocess.check_call(
-                ['terraform', 'output'], stdout=fout, env=env_copy)
-#
-# in regions folder
-# terraform init
-# terraform apply
-# terraform output -json regions > jq -r
-# file is [ "asia-east1", "asia-east2", ..., "us-west4"]
-# see https://cloud.google.com/compute/docs/regions-zones for name to description mapping
+                ['terraform', 'output', '-json'], stdout=fout, env=env_copy)
 
 
 if __name__ == "__main__":
