@@ -11,23 +11,32 @@ instance_keys=$(/usr/local/bin/curl -s \
   -H "Metadata-Flavor: Google" \
   http://metadata.google.internal/computeMetadata/v1/instance/attributes/ssh-keys)
 
-admin_account="lappland"
-if [ "$instance_keys" != "" ]
-then
-    echo "$instance_keys" | while read line
-    do
-        username="$(echo $line | cut -d: -f1)"
-        user_key="$(echo $line | cut -d: -f2)"
-        key_comment="$(echo $line | awk '{print $NF}')"
+get_admin_username () {
+  if [ -z "$1" ]; then
+    echo "lappland"
+  else
+    echo "$1" | while read line
+  do
+    username="$(echo $line | cut -d: -f1)"
+    echo $username
+  done
+  fi
+}
 
-        if [ "$username" != "" ]
-        then
-            admin_account=$username
-        fi
-    done
-else
-    echo "No user metadata found"
+get_public_key () {
+  if [ -z "$1" ]; then
+    echo ""
+  else
+    echo "$1" | while read line
+  do
+    user_key="$(echo $line | cut -d: -f2)"
+    echo $user_key
+  done
 fi
+}
+
+admin_account=$(get_admin_username "$instance_keys")
+admin_ssh_public_key=$(get_public_key "$instance_keys")
 
 # set lappland_id from metadata
 lappland_id=$(/usr/local/bin/curl -s \
