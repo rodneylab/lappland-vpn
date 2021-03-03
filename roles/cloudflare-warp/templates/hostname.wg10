@@ -1,0 +1,4 @@
+wgkey {{ warp_wguard_private_key.stdout }}
+inet {{ warp_lappland_address.stdout }} 255.255.255.255 NONE mtu 1280 description "warp conduit"
+wgpeer {{ warp_wguard_public_key.stdout }} wgendpoint {{ warp_lappland_endpoint_ip.stdout }} {{ warp_wguard_port.stdout }} wgaip 0.0.0.0/0
+!/sbin/ifconfig \$if mtu 1280

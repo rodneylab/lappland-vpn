@@ -1,0 +1,73 @@
+---
+- name: wgcf repo cloned
+  git:
+    repo: https://github.com/ViRb3/wgcf.git
+    dest: /root/git/wgcf
+
+- name: wgcf register run
+  shell: "cd /root/git/wgcf && go run main.go register --accept-tos"
+
+- name: wgcf generate run
+  shell: "cd /root/git/wgcf && go run main.go generate"
+
+- shell: cat /root/git/wgcf/wgcf-profile.conf | grep Address | grep -Eo "([0-9]{1,3}\.){3}[0-9]{1,3}"
+  register: warp_lappland_address
+
+- shell: cat /root/git/wgcf/wgcf-profile.conf | grep Endpoint | grep -Eo "([a-z]+\.)+[a-z]+"
+  register: warp_lappland_endpoint
+
+- shell: cat /root/git/wgcf/wgcf-profile.conf | grep Endpoint | grep -Eo "[0-9]{3,5}$"
+  register: warp_wguard_port
+
+- shell: cat /root/git/wgcf/wgcf-profile.conf | grep PublicKey | grep -Eo "[a-zA-Z0-9+/=]{44}$"
+  register: warp_wguard_public_key
+
+- shell: cat /root/git/wgcf/wgcf-profile.conf | grep PrivateKey | grep -Eo "[a-zA-Z0-9+/=]{44}$"
+  register: warp_wguard_private_key
+
+- shell: route -n show -inet | grep default | awk '{print $2}'
+  register: default_gateway
+  ignore_errors: true
+
+- shell: dig +short "{{ warp_lappland_endpoint.stdout }}"
+  register: warp_lappland_endpoint_ip
+  ignore_errors: true
+
+- name: hostname.wg10 for warp wireguard deployed
+  template:
+    src: hostname.wg10
+    dest: /etc/
+    owner: root
+    group: wheel
+    mode: 0640
+    backup: no
+
+- name: sysctl ipv4 forwarding enabled
+  sysctl:
+    name: net.inet.ip.forwarding
+    value: '1'
+    state: present
+    reload: yes
+
+- name: wg10 ingterface brought up
+  shell: sh /etc/netstart wg10
+  register: warpup
+  ignore_errors: true
+  changed_when: false
+  check_mode: no
+
+- name: pf.rules deployed
+  template:
+    src: pf.rules
+    dest: /etc/pf.anchors/
+    owner: root
+    group: wheel
+    mode: 0600
+    backup: no
+  notify:
+    - restart pf
+
+- name: Reload anchor
+  shell: "/sbin/pfctl -a pf.rules -F Tables && /sbin/pfctl -a pf.rules -f /etc/pf.anchors/pf.rules"
+  changed_when: false
+  check_mode: no
