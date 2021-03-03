@@ -59,7 +59,7 @@ def get_vpn_peers(parameters, server_address):
             while (new_address in addresses_dict) or (
                     new_address == server_address):
                 new_address = IPv4Address(
-                    wg_subnet.network_address + randint(1,254))
+                    wg_subnet.network_address + randint(1, 254))
             peer_array.append(
                 '{ "name":"'
                 + peer + '", "address":"'
@@ -76,8 +76,8 @@ def get_vpn_wg_server_address():
     server_address = IPv4Address(address_range.network_address + bits)
     wg_subnet = IPv4Network(str(server_address) + "/24", False)
     if ((server_address == wg_subnet) or (server_address - 255 == wg_subnet)):
-        server_address = IPv4Address(wg_subnet.network_address + randint(1,254))
-    # print(str(server_address))
+        server_address = IPv4Address(
+            wg_subnet.network_address + randint(1, 254))
     return str(server_address)
 
 
@@ -130,7 +130,7 @@ def main():
     command = ['sh', 'generate-ssh-keys.sh', get_ssh_key_name()]
     subprocess.check_call(command, env=env_copy)
 
-    # prompt for image path
+    # todo(rodney): prompt for image path
     env_copy['TF_VAR_image'] = '../../../../openbsd-amd64-68-210227.tar.gz'
     env_copy['TF_VAR_image_name'] = 'openbsd-amd64-68-210227'
     env_copy['TF_VAR_image_file'] = 'openbsd-amd64-68-210227.tar.gz'
