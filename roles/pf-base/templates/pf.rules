@@ -1,8 +1,9 @@
+# Macros
 ## Ports
-ssh_port = "{{ ssh_port }}"
 public_tcp_ports = \
   "{ 53, 443, 80, 43, 22, 993, 465, 853, 2083, 2096, 5223, 1551, 9600, 587, 5432 }"
 public_udp_ports = "{ 53, 51820, 8443, 3478, 443, 123 }"
+ssh_port = "{{ ssh_port }}"
 
 # Tables
 table <blocklist> persist file "/etc/pf/blocklist"
@@ -11,6 +12,7 @@ table <blocklist> persist file "/etc/pf/blocklist"
 set block-policy drop
 set fingerprints "/etc/pf.os"
 set optimization normal
+set syncookies adaptive (start 25%, end 12%)
 set limit { states 30000, table-entries 250000 }
 set state-policy if-bound
 set ruleset-optimization basic
