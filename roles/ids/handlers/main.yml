@@ -1,0 +1,11 @@
+- name: enable suricata
+  service:
+    name: suricata
+    enabled: yes
+    arguments: -i vio0
+
+- name: start suricata
+  service:
+    name: suricata
+    state: started
+    arguments: -i vio0

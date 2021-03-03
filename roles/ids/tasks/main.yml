@@ -1,0 +1,89 @@
+---
+- name: IDS packages installed
+  openbsd_pkg:
+    name:
+      - suricata
+      - oinkmaster
+      - ossec-hids
+    state: present
+
+- name: Suricata config deployed
+  copy:
+    src: "suricata.yaml"
+    dest: "/etc/suricata/suricata.yaml"
+    owner: root
+    group: wheel
+    mode: '0644'
+    backup: yes
+
+- name: Suricata config updated
+  replace:
+    path: /etc/suricata/suricata.yaml
+    regexp: "{{ item.regexp }}"
+    replace: "{{ item.replace }}"
+  loop:
+    - { regexp: 'HOME_NET_PLACEHOLDER',
+        replace: '[{{ ansible_vio0.ipv4.address }},{{ wireguard_subnet }},{{ ansible_vio0.lo100.address }}]' }
+    - { regexp: 'SSH_PORTS_PLACEHOLDER', replace: "[22, {{ ssh_port }}]" }
+
+- name: suricta service enabled
+  shell: "/usr/sbin/rcctl enable suricata"
+
+- name: Oinkmaster config deployed
+  template:
+    src: oinkmaster.conf
+    dest: /etc/
+    owner: root
+    group: wheel
+    mode: '0644'
+    backup: yes
+
+- name: suricata configs deployed if absent
+  template:
+    src: "{{ item }}"
+    dest: /etc/suricata/
+    owner: root
+    force: no
+    group: wheel
+    mode: '0644'
+  loop:
+    - classification.config
+    - reference.config
+
+- name: suricata scripts deployed
+  template:
+    src: "{{ item }}"
+    dest: /etc/suricata/
+    owner: root
+    group: wheel
+    mode: '0755'
+    backup: yes
+  loop:
+    - suricata-rules-update.sh
+    - suricata-log-rotate.sh
+
+- name: suricata-rules-update.sh script added to cron
+  cron:
+    name: Suricata rules update
+    minute: "~"
+    hour: "{{ range(1, 24) | random }}"
+    job: "/bin/sh /etc/suricata/suricata-rules-update.sh"
+    user: root
+
+- name: suricata-log-rotate.sh script added to cron
+  cron:
+    name: Suricata log update
+    minute: "{{ range(0,60) | random }}"
+    job: "/bin/sh /etc/suricata/suricata-log-rotate.sh"
+    user: root
+
+- name: Suricata flags set
+  service:
+    name: suricata
+    state: restarted
+    arguments: -i vio0
+
+- name: Suricata is started
+  service:
+    name: suricata
+    state: restarted
