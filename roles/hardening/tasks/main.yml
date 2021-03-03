@@ -2,7 +2,7 @@
 - name: Compiler permissions hardened
   file:
     path: "{{ item }}"
-    state: file
+    state: touch
     mode: '0754'
   with_items:
     - /usr/bin/as
@@ -12,7 +12,6 @@
     - /usr/bin/g++
     - /usr/local/bin/cargo
     - /usr/local/bin/rustc
-    - /usr/local/go/bin/go
 
 - name: Accounting enabled
   shell: "/usr/sbin/rcctl enable accounting"
