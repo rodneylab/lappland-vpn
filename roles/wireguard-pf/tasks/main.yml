@@ -1,0 +1,25 @@
+---
+- name: pf.conf deployed
+  template:
+    src: pf.conf
+    dest: /etc/
+    owner: root
+    group: wheel
+    mode: 0600
+    backup: no
+
+- name: pf.rules deployed
+  template:
+    src: pf.rules
+    dest: /etc/pf.anchors/
+    owner: root
+    group: wheel
+    mode: 0600
+    backup: no
+  notify:
+    - restart pf
+
+- name: anchor reloaded
+  shell: "/sbin/pfctl -a pf.rules -F Tables && /sbin/pfctl -a pf.rules -f /etc/pf.anchors/pf.rules"
+  changed_when: false
+  check_mode: no

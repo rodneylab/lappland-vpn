@@ -1,0 +1,52 @@
+---
+- name: WireGuard directories created
+  file:
+    path: "{{ item }}"
+    owner: "{{ admin_account }}"
+    group: wheel
+    state: directory
+    mode: 0750
+  loop:
+    - "/etc/wireguard"
+    - "/etc/wireguard/templates"
+    - "/etc/wireguard/templates/server"
+    - "/etc/wireguard/templates/peers"
+    - "/etc/wireguard/peers"
+
+- name: WireGuard peer conf templates deployed
+  template:
+    src: peer.conf.template
+    dest: "/etc/wireguard/templates/peers/{{ item.name }}.conf"
+    owner: "{{ admin_account }}"
+    group: wheel
+    mode: 0640
+    backup: no
+  loop: "{{ peers }}"
+
+- name: wireguard-keygen script deployed
+  template:
+    src: wireguard-keygen.sh
+    dest: /etc/wireguard/wireguard-keygen.sh
+    owner: "{{ admin_account }}"
+    group: wheel
+    mode: 0755
+    backup: no
+
+- name: wireguard keys generated
+  shell: "sh /etc/wireguard/wireguard-keygen.sh wg0"
+  changed_when: false
+  check_mode: no
+
+- name: sysctl ipv4 forwarding enabled
+  sysctl:
+    name: net.inet.ip.forwarding
+    value: '1'
+    state: present
+    reload: yes
+
+- name: wg0 interface brought up
+  shell: sh /etc/netstart wg0
+  register: tunup
+  ignore_errors: true
+  changed_when: false
+  check_mode: no

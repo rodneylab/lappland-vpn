@@ -1,0 +1,11 @@
+[Interface]
+Address = {{ item.address }}
+PrivateKey = PRIVATE_KEY
+MTU = 1380
+DNS = {{ ansible_lo100.ipv4.address }}
+
+[Peer]
+PublicKey = PEER_PUBLIC_KEY
+PresharedKey = PRESHARED_KEY
+AllowedIPs = 0.0.0.0/0
+Endpoint = {{ lappland_server_ip }}:{{ wireguard_port }}
