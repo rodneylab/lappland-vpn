@@ -56,7 +56,7 @@ public_server_address=$(/usr/local/bin/curl -L https://diagnostic.opendns.com/my
 public_net=$(ifconfig vio0 | grep inet | awk '{print $2}')
 extra_vars=$( /usr/local/bin/jq -n \
               --arg admin_account "$admin_account" \
-              --arg admin_ssh_public_key "$user_key" \
+              --arg admin_ssh_public_key "$admin_ssh_public_key" \
               --arg lappland_id "$lappland_id" \
               --arg pub_add "$public_server_address" \
               --arg pub_net "$public_net" \
@@ -77,4 +77,6 @@ extra_vars=$( /usr/local/bin/jq -n \
 cd /root/git/lappland-vpn/ && /usr/local/bin/ansible-playbook \
   install.yml \
   --tag=users,system,sysctl,pf-base,dnscrypt-proxy,unbound,encrypted-dns,hardening,reboot \
-  --extra-vars="$extra_vars" 2>&1 | tee -a /var/log/bootstrap
+  --extra-vars="$extra_vars" 2>&1 | tee -a /var/log/bootstrap && \
+  touch "/var/log/lappland-result.json"
+
