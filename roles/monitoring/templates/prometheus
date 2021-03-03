@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# $OpenBSD: prometheus.rc,v 1.1.1.1 2018/01/10 16:26:19 claudio Exp $
+
+daemon="/usr/local/bin/prometheus"
+daemon_flags="--config.file /etc/prometheus/prometheus.yml"
+daemon_flags="${daemon_flags} --storage.tsdb.path '/var/prometheus' --storage.tsdb.retention.time=90d --web.listen-address="localhost:9090"
+daemon_user=_prometheus
+
+. /etc/rc.d/rc.subr
+
+pexp="${daemon}.*"
+rc_bg=YES
+rc_reload=NO
+
+rc_start() {
+        ${rcexec} "${daemon} ${daemon_flags} < /dev/null 2>&1 | \
+                logger -p daemon.info -t prometheus"
+}
+
+rc_cmd $1

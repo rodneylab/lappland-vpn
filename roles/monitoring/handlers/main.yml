@@ -1,0 +1,17 @@
+- name: enable monitoring daemons
+  service:
+    name: "{{ item }}"
+    enabled: yes
+  loop:
+    - prometheus
+    - node_exporter
+    - grafana
+
+- name: start monitoring daemons
+  service:
+    name: "{{ item }}"
+    state: started
+  loop:
+    - prometheus
+    - node_exporter
+    - grafana

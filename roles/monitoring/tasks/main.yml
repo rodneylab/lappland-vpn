@@ -1,0 +1,31 @@
+---
+- name: Monitoring packages installed
+  openbsd_pkg:
+    name:
+      - prometheus
+      - node_exporter
+      - grafana
+    state: present
+  notify: enable monitoring daemons
+
+- name: Monitoring configuration files deployed
+  template:
+    src: "{{ item }}"
+    dest: /etc/prometheus/
+    owner: root
+    group: wheel
+    mode: 0644
+    backup: no
+  loop:
+    - prometheus.yml
+    - targets.json
+
+- name: Prometheus rcctl script deployed
+  template:
+    src: prometheus
+    dest: /etc/rc.d/
+    owner: root
+    group: bin
+    mode: 0755
+    backup: no
+  notify: start monitoring daemons
