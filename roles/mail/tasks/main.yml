@@ -1,0 +1,77 @@
+---
+- name: Check mandatory variables are defined
+  assert:
+    that:
+      - gmail_account is defined
+      - gmail_secret is defined
+
+- name: mail server certificates generated
+  x509_certificate:
+    owner: root
+    group: wheel
+    mode: 0600
+    path: /etc/ssl/smtp.gmail.com.crt
+    privatekey_path: /etc/ssl/private/smtp.gmail.com.key
+    provider: selfsigned
+    selfsigned_not_after: "+365d"
+
+- name: smtpd.conf deployed
+  template:
+    src: smtpd.conf
+    dest: /etc/mail/
+    owner: root
+    group: wheel
+    mode: 0644
+    backup: no
+  notify:
+    - restart smtpd
+
+- name: OpenSMTP aliases deployed
+  template:
+    src: aliases
+    dest: /etc/mail/
+    owner: root
+    group: wheel
+    mode: 0644
+    backup: no
+  notify:
+    - restart smtpd
+
+- name: newaliases run
+  shell: "makemap -t aliases /etc/mail/aliases"
+  ignore_errors: true
+  changed_when: false
+  check_mode: no
+
+- name: Check for secrets.db
+  shell: "ls /etc/mail/secrets.db"
+  register: secretsdb
+  ignore_errors: true
+  changed_when: false
+  check_mode: no
+
+- name: OpenSMTP secrets deployed
+  template:
+    src: secrets
+    dest: /etc/mail
+    owner: root
+    group: _smtpd
+    mode: 0640
+    backup: no
+  when: "secretsdb.rc == 1"
+  no_log: True
+  notify:
+    - restart smtpd
+
+- name: secrets db created
+  shell: "cd /etc/mail && /usr/sbin/makemap secrets"
+  args:
+    creates: /etc/mail/secrets.db
+  when: "secretsdb.rc == 1"
+  notify:
+    - restart smtpd
+
+- name: secrets file removed
+  file:
+    state: absent
+    path: "/etc/mail/secrets"
