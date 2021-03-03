@@ -41,7 +41,7 @@ gcloud services enable compute.googleapis.com
 
 ### Create a bucket for the image and upload it:
 ```bash
-BUCKET="gs://lappland-openbsd-images-YYYY-MM-DD"
+BUCKET="gs://<enter-a name-for-your-bucket>"
 gcloud projects list
 gsutil mb -b on -l ${REGION} -p ${PROJECT_ID} ${BUCKET}
 IMAGE_HASH=$(openssl dgst -md5 -binary openbsd-amd64-68-201107.tar.gz | openssl enc -base64)
