@@ -1,0 +1,5 @@
+To do a test login and setup Duo run: /usr/local/sbin/login_duo.
+
+Once set up and tested, uncomment this line in ssh file:
+#ForceCommand /usr/local/sbin/login_duo
+# see https://duo.com/docs/loginduo for more

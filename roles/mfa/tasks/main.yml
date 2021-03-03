@@ -1,0 +1,21 @@
+---
+- name: login_duo installed
+  openbsd_pkg:
+    name: 'login_duo'
+    state: present
+
+- name: login_duo.conf deployed
+  template:
+    src: login_duo.conf
+    dest: /etc/
+    owner: sshd
+    group: wheel
+    mode: 0600
+
+- name: Setup instructions deployed
+  copy:
+    src: "login_duo_info.txt"
+    dest: /home/{{ admin_account }}
+    owner: root
+    group: wheel
+    mode: '0644'
