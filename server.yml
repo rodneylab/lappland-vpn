@@ -1,0 +1,71 @@
+---
+- name: Add the server to an inventory group
+  add_host:
+    name: "{% if cloud_instance_ip == 'localhost' %}localhost{% else %}{{ cloud_instance_ip }}{% endif %}"
+    groups: vpn-host
+    ansible_connection: "{% if cloud_instance_ip == 'localhost' %}local{% else %}ssh{% endif %}"
+    ansible_ssh_user: "{{ ssh_user }}"
+    ansible_ssh_port: "{{ ssh_port }}"
+    ansible_python_interpreter: "/usr/bin/python3"
+    lappland_server_name: "{{ lappland_server_name }}"
+
+- name: Additional variables for the server
+  add_host:
+    name: "{{ cloud_instance_ip }}"
+    ansible_ssh_private_key_file: "{{ ssh_private_key_file }}"
+
+- name: Wait until SSH becomes ready...
+  wait_for:
+    port: "{{ ssh_port }}"
+    host: "{{ lappland_server_ip }}"
+    search_regex: "OpenSSH"
+    delay: 10
+    timeout: 320
+    state: present
+
+- name: Wait 600 seconds for target connection to become reachable/usable
+  wait_for_connection:
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['vpn-host'] }}"
+
+- name: Configure the server and install required software
+  hosts: vpn-host
+  gather_facts: true
+  become: true
+  tasks:
+    - block:
+      - name: Wait until the cloud-init completed
+        wait_for:
+          path: /var/log/lappland-result.json
+          delay: 10
+          timeout: 600
+          state: present
+        become: false
+
+      - import_role:
+          name: wireguard-pf
+        tags: wireguard-pf
+
+      - import_role:
+          name: wireguard-configs
+        tags: wireguard-configs
+
+      - import_role:
+          name: mail
+        tags: mail
+
+      - import_role:
+          name: ids
+        tags: ids
+
+      - import_role:
+          name: mfa
+        tags: mfa
+
+      - import_role:
+          name: monitoring
+        tags: monitoring
+
+      - import_role:
+          name: cloudflare-warp
+        tags: cloudflare-warp

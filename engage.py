@@ -1,7 +1,8 @@
 #!/usr/bin/env python3 -tt
 # -*- coding: utf-8 -*-
 import datetime
-from random import choices, randint
+from ipaddress import IPv4Network, IPv4Address
+from random import choices, getrandbits, randint
 from contextlib import contextmanager
 import os
 from pathlib import Path
@@ -41,6 +42,49 @@ def get_date_string():
     return datetime.datetime.now().strftime('%Y-%m-%d')
 
 
+def get_lappland_ip():
+    # todo(rodney): add jq command here to extract ip address from
+    # terraform output
+    return '0.0.0.0'
+
+
+def get_vpn_peers(parameters, server_address):
+    wg_subnet = IPv4Network(str(server_address) + "/24", False)
+    addresses_dict = {}
+    peer_array = []
+    if 'vpn_peers' in parameters:
+        for peer in parameters['vpn_peers']:
+            new_address = IPv4Address(
+                wg_subnet.network_address + randint(1, 254))
+            while (new_address in addresses_dict) or (
+                    new_address == server_address):
+                new_address = IPv4Address(
+                    wg_subnet.network_address + randint(1,254))
+            peer_array.append(
+                '{ "name":"'
+                + peer + '", "address":"'
+                + str(new_address)
+                + '"}'
+            )
+        print('[' + ','.join(peer_array) + ']')
+
+
+def get_vpn_wg_server_address():
+    address_range = IPv4Network("172.16.0.0/12")
+    bits = getrandbits(20)
+
+    server_address = IPv4Address(address_range.network_address + bits)
+    wg_subnet = IPv4Network(str(server_address) + "/24", False)
+    if ((server_address == wg_subnet) or (server_address - 255 == wg_subnet)):
+        server_address = IPv4Address(wg_subnet.network_address + randint(1,254))
+    # print(str(server_address))
+    return str(server_address)
+
+
+def get_vpn_wg_subnet(server_address):
+    return str(IPv4Network(str(server_address) + "/24", False))
+
+
 def get_ssh_key_name():
     return './configs/id_ed25519_lappland_' + get_date_string()
 
@@ -54,6 +98,12 @@ def load_config():
     with open(r'./config.yml') as file:
         parameters = yaml.load(file, Loader=yaml.FullLoader)
     return parameters
+
+
+def get_config_parameter(parameter_name, parameters, default):
+    if parameter_name in parameters:
+        return parameters[parameter_name]
+    return default
 
 
 def main():
@@ -100,13 +150,30 @@ def main():
     with set_directory(Path('./terraform/gcloud')):
         subprocess.check_call(['terraform', 'init'], env=env_copy)
         with open('../../terraform-plan.log', 'w') as fout:
-            subprocess.check_call(
-                ['terraform', 'plan'], stdout=fout, env=env_copy)
+            command = ['terraform', 'plan']
+            subprocess.check_call(command, stdout=fout, env=env_copy)
 
         subprocess.check_call(['terraform', 'apply'], env=env_copy)
         with open('../../terraform-output.json', 'w') as fout:
-            subprocess.check_call(
-                ['terraform', 'output', '-json'], stdout=fout, env=env_copy)
+            command = ['terraform', 'output', '-json']
+            subprocess.check_call(command, stdout=fout, env=env_copy)
+
+    env_copy['LAPPLAND_SERVER_IP'] = get_lappland_ip()
+    env_copy['SSH_PRIVATE_KEY_FILE'] = get_ssh_key_name()
+    env_copy['SSH_CLIENTS'] = get_config_parameter(
+        'ssh_clients', parameters, firewall_select_source)
+    env_copy['WIREGUARD_PEERS'] = get_config_parameter(
+        'wireguard_peers', parameters, firewall_select_source)
+    wireguard_address = get_vpn_wg_server_address()
+    env_copy['WIREGUARD_SERVER_ADDRESS'] = wireguard_address
+    env_copy['WIREGUARD_SUBNET'] = get_vpn_wg_subnet(wireguard_address)
+    env_copy['PEERS'] = get_vpn_peers(parameters, wireguard_address)
+    command = ['sh', 'server.sh']
+
+    response = input("Do you accept wgcf Terms of Service? (yes/no)")
+    if response != 'yes':
+        return
+    subprocess.check_call(command, env=env_copy)
 
 
 if __name__ == "__main__":
