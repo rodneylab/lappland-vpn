@@ -3,16 +3,16 @@
   assert:
     that:
       - gmail_account is defined
-      - gmail_secret' is defined
+      - gmail_secret is defined
 
 - name: mail server certificates generated
-  community.crypto.x509_certificate:
-    owner: root
-    group: wheel
-    mode: 0600
+  x509_certificate:
     path: /etc/ssl/smtp.gmail.com.crt
     privatekey_path: /etc/ssl/private/smtp.gmail.com.key
     provider: selfsigned
+    owner: root
+    group: wheel
+    mode: '0600'
     selfsigned_not_after: "+365d"
 
 - name: smtpd.conf deployed
@@ -21,7 +21,7 @@
     dest: /etc/mail/
     owner: root
     group: wheel
-    mode: 0644
+    mode: '0644'
     backup: no
   notify:
     - restart smtpd
@@ -32,7 +32,7 @@
     dest: /etc/mail/
     owner: root
     group: wheel
-    mode: 0644
+    mode: '0644'
     backup: no
   notify:
     - restart smtpd
@@ -56,7 +56,7 @@
     dest: /etc/mail
     owner: root
     group: _smtpd
-    mode: 0640
+    mode: '0640'
     backup: no
   when: "secretsdb.rc == 1"
   no_log: True
@@ -74,4 +74,4 @@
 - name: secrets file removed
   file:
     state: absent
-    path: "/etc/mail/secrets"
+    path: /etc/mail/secrets
