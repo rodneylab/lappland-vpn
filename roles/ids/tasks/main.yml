@@ -37,6 +37,7 @@
     group: wheel
     mode: '0644'
     backup: yes
+  no_log: True
 
 - name: suricata configs deployed if absent
   template:
