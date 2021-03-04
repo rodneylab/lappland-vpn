@@ -3,7 +3,7 @@
 extra_vars=$( jq -n \
               --arg lappland_server_name "$TF_VAR_server_name" \
               --arg lappland_server_ip "$LAPPLAND_SERVER_IP" \
-              --arg peers `echo $PEERS | jq` \
+              --arg peers '$PEERS' \
               --arg ssh_private_key_file "$SSH_PRIVATE_KEY_FILE" \
               --arg ssh_user "$LAPPLAND_ADMIN" \
               --arg ssh_peers "$SSH_PEERS" \
@@ -13,8 +13,6 @@ extra_vars=$( jq -n \
               --arg wireguard_server_address "$WIREGUARD_SERVER_ADDRESS" \
               --arg wireguard_subnet "$WIREGUARD_SUBNET" \
               '{
-                "gmail_email"
-                "gmail_secret"
                 "lappland_server_name":$lappland_server_name,
                 "lappland_server_ip":$lappland_server_ip,
                 "peers":$peers,
@@ -30,7 +28,5 @@ extra_vars=$( jq -n \
 )
 
 # Run playbook
-ansible-playbook -e @secrets_file.asc --ask-vault-pass main.yml \
-  --extra-vars="$extra_vars" 2>&1 | tee -a /var/log/bootstrap.log
-
-
+ansible-playbook -e @secrets_file.enc --ask-vault-pass main.yml \
+  --extra-vars="$extra_vars" 2>&1 | tee -a ./server-configure.log
