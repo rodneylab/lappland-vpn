@@ -3,10 +3,10 @@
   assert:
     that:
       - gmail_account is defined
-      - gmail_secret is defined
+      - gmail_secret' is defined
 
 - name: mail server certificates generated
-  x509_certificate:
+  community.crypto.x509_certificate:
     owner: root
     group: wheel
     mode: 0600
