@@ -8,9 +8,9 @@
     - block:
       - name: Add the server to an inventory group
         add_host:
-          name: "{% if cloud_instance_ip == 'localhost' %}localhost{% else %}{{ cloud_instance_ip }}{% endif %}"
+          name: "{% if lappland_server_ip == 'localhost' %}localhost{% else %}{{ lappland_server_ip }}{% endif %}"
           groups: vpn-host
-          ansible_connection: "{% if cloud_instance_ip == 'localhost' %}local{% else %}ssh{% endif %}"
+          ansible_connection: "{% if lappland_server_ip == 'localhost' %}local{% else %}ssh{% endif %}"
           ansible_ssh_user: "{{ ssh_user }}"
           ansible_ssh_port: "{{ ssh_port }}"
           ansible_python_interpreter: "/usr/bin/python3"
@@ -18,7 +18,7 @@
 
       - name: Additional variables for the server
         add_host:
-          name: "{{ cloud_instance_ip }}"
+          name: "{{ lappland_server_ip }}"
           ansible_ssh_private_key_file: "{{ ssh_private_key_file }}"
 
       - name: Wait until SSH becomes ready...
