@@ -78,11 +78,16 @@
     job: "/bin/sh /etc/suricata/suricata-log-rotate.sh"
     user: root
 
+- name: Suricata enabled
+  service:
+    name: suricata
+    enabled: yes
+    arguments: '-i vio0'
+
 - name: Suricata flags set
   service:
     name: suricata
     state: restarted
-    arguments: -i vio0
 
 - name: Suricata is started
   service:
