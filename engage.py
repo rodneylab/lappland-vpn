@@ -34,7 +34,6 @@ def get_random_server_name():
     result = choices(string.ascii_lowercase, k=3)
     for i in range(0, 7):
         result.append(str(randint(0, 9)))
-    print(''.join(result))
     return ''.join(result)
 
 
@@ -66,7 +65,12 @@ def get_vpn_peers(parameters, server_address):
                 + str(new_address)
                 + '"}'
             )
-        print('[' + ','.join(peer_array) + ']')
+        return '[' + ','.join(peer_array) + ']'
+    else:
+        print(
+            '"vpn_peers" entry is missing in config file.  '
+            + 'Please check the file.')
+        return ''
 
 
 def get_vpn_wg_server_address():
@@ -168,11 +172,12 @@ def main():
     env_copy['WIREGUARD_SERVER_ADDRESS'] = wireguard_address
     env_copy['WIREGUARD_SUBNET'] = get_vpn_wg_subnet(wireguard_address)
     env_copy['PEERS'] = get_vpn_peers(parameters, wireguard_address)
-    command = ['sh', 'server.sh']
 
-    response = input("Do you accept wgcf Terms of Service? (yes/no)")
+    response = input("Do you accept wgcf Terms of Service? (yes/no) ")
     if response != 'yes':
         return
+
+    command = ['sh', 'server.sh']
     subprocess.check_call(command, env=env_copy)
 
 
