@@ -21,7 +21,6 @@
 - name: Lappland Warp address registered
   shell: cat /root/git/wgcf/wgcf-profile.conf | grep Address | grep -Eo "([0-9]{1,3}\.){3}[0-9]{1,3}"
   register: warp_lappland_address
-  when: wgcf_profile.stat.exists == False
 
 - name: Lappland Warp endpoint registered
   shell: cat /root/git/wgcf/wgcf-profile.conf | grep Endpoint | grep -Eo "([a-z]+\.)+[a-z]+"
