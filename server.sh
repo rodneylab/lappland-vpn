@@ -6,7 +6,7 @@ extra_vars=$( jq -n \
               --arg peers "$PEERS" \
               --arg ssh_private_key_file "$SSH_PRIVATE_KEY_FILE" \
               --arg admin_account "$LAPPLAND_ADMIN" \
-              --arg ssh_peers "$SSH_CLIENTS" \
+              --arg ssh_clients "$SSH_CLIENTS" \
               --arg ssh_port "$TF_VAR_ssh_port" \
               --arg wireguard_peers "$WIREGUARD_PEERS" \
               --arg wireguard_port "$TF_VAR_wg_port" \
@@ -29,6 +29,7 @@ extra_vars=$( jq -n \
 )
 
 # Run playbook
+ansible-galaxy collection install community.crypto
 ansible-playbook -e @secrets_file.enc \
                  --ask-vault-pass \
                  --become-method=doas \
