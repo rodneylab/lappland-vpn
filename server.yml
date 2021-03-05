@@ -59,6 +59,7 @@
       - import_role:
           name: wireguard-configs
         tags: wireguard-configs
+        become: yes
 
       - import_role:
           name: wireguard-pf
