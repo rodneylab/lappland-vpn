@@ -1,4 +1,9 @@
 ---
+- name: Packages needed to build wgcf installed
+  openbsd_pkg:
+    name: go
+    state: present
+
 - name: wgcf repo cloned
   git:
     repo: https://github.com/ViRb3/wgcf.git
