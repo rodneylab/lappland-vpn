@@ -1,6 +1,7 @@
 #!/bin/sh
 
 extra_vars=$( jq -n \
+              --arg lappland_id "$TF_VAR_lappland_id" \
               --arg lappland_server_name "$TF_VAR_server_name" \
               --arg lappland_server_ip "$LAPPLAND_SERVER_IP" \
               --arg peers "$PEERS" \
@@ -14,6 +15,7 @@ extra_vars=$( jq -n \
               --arg wireguard_subnet "$WIREGUARD_SUBNET" \
               '{
                 "admin_account":$admin_account,
+                "lappland_id":$lappland_id,
                 "lappland_server_name":$lappland_server_name,
                 "lappland_server_ip":$lappland_server_ip,
                 "peers":$peers,
