@@ -42,11 +42,11 @@
   become: true
   tasks:
     - block:
-      - name: Wait until the cloud-init completed
+      - name: Wait until the infrastructure build and initialisation is complete
         wait_for:
           path: /var/log/lappland-result.json
           delay: 10
-          timeout: 600
+          timeout: 1200
           state: present
         become: false
 
