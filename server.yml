@@ -13,7 +13,7 @@
           ansible_connection: "{% if lappland_server_ip == 'localhost' %}local{% else %}ssh{% endif %}"
           ansible_ssh_user: "{{ ssh_user }}"
           ansible_ssh_port: "{{ ssh_port }}"
-          ansible_python_interpreter: "/usr/bin/python3"
+          ansible_python_interpreter: "/usr/local/bin/python3"
           lappland_server_name: "{{ lappland_server_name }}"
 
       - name: Additional variables for the server
@@ -30,10 +30,11 @@
           timeout: 320
           state: present
 
-      - name: Wait 600 seconds for target connection to become reachable/usable
-        wait_for_connection:
-        delegate_to: "{{ item }}"
-        loop: "{{ groups['vpn-host'] }}"
+      # - name: Wait 600 seconds for target connection to become reachable/usable
+      #   wait_for_connection:
+      #     sleep: 10
+      #   delegate_to: "{{ item }}"
+      #   loop: "{{ groups['vpn-host'] }}"
 
 - name: Configure the server and install required software
   hosts: vpn-host
@@ -49,13 +50,19 @@
           state: present
         become: false
 
-      - import_role:
-          name: wireguard-pf
-        tags: wireguard-pf
+      - shell: ifconfig vio0 | grep inet | awk '{print $2}'
+        register: public_iface_address
+
+      - shell: ifconfig lo100 | grep inet | awk '{print $2}'
+        register: services_address
 
       - import_role:
           name: wireguard-configs
         tags: wireguard-configs
+
+      - import_role:
+          name: wireguard-pf
+        tags: wireguard-pf
 
       - import_role:
           name: mail
