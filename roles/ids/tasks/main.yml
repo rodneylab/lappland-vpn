@@ -23,7 +23,7 @@
     replace: "{{ item.replace }}"
   loop:
     - { regexp: 'HOME_NET_PLACEHOLDER',
-        replace: '[{{ ansible_vio0.ipv4.address }},{{ wireguard_subnet }},{{ ansible_vio0.lo100.address }}]' }
+        replace: '[{{ public_iface_address.stdout }},{{ wireguard_subnet }},{{ services_address.stdout }}]' }
     - { regexp: 'SSH_PORTS_PLACEHOLDER', replace: "[22, {{ ssh_port }}]" }
 
 - name: suricta service enabled
