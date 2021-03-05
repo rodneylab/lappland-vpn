@@ -3,23 +3,24 @@
 extra_vars=$( jq -n \
               --arg lappland_server_name "$TF_VAR_server_name" \
               --arg lappland_server_ip "$LAPPLAND_SERVER_IP" \
-              --arg peers '$PEERS' \
+              --arg peers "$PEERS" \
               --arg ssh_private_key_file "$SSH_PRIVATE_KEY_FILE" \
-              --arg ssh_user "$LAPPLAND_ADMIN" \
-              --arg ssh_peers "$SSH_PEERS" \
+              --arg admin_account "$LAPPLAND_ADMIN" \
+              --arg ssh_peers "$SSH_CLIENTS" \
               --arg ssh_port "$TF_VAR_ssh_port" \
               --arg wireguard_peers "$WIREGUARD_PEERS" \
               --arg wireguard_port "$TF_VAR_wg_port" \
               --arg wireguard_server_address "$WIREGUARD_SERVER_ADDRESS" \
               --arg wireguard_subnet "$WIREGUARD_SUBNET" \
               '{
+                "admin_account":$admin_account,
                 "lappland_server_name":$lappland_server_name,
                 "lappland_server_ip":$lappland_server_ip,
                 "peers":$peers,
                 "ssh_port":$ssh_port,
-                "ssh_peers":$ssh_peers,
+                "ssh_clients":$ssh_clients,
                 "ssh_private_key_file":$ssh_private_key_file,
-                "ssh_user":$ssh_user,
+                "ssh_user":$admin_account,
                 "wireguard_peers":$wireguard_peers,
                 "wireguard_port":$wireguard_port,
                 "wireguard_server_address":$wireguard_server_address,
@@ -28,5 +29,9 @@ extra_vars=$( jq -n \
 )
 
 # Run playbook
-ansible-playbook -e @secrets_file.enc --ask-vault-pass main.yml \
-  --extra-vars="$extra_vars" 2>&1 | tee -a ./server-configure.log
+ansible-playbook -e @secrets_file.enc \
+                 --ask-vault-pass \
+                 --become-method=doas \
+                 --ask-become-pass \
+                 main.yml \
+                 --extra-vars="$extra_vars" 2>&1 | tee -a ./server-configure.log
