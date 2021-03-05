@@ -5,8 +5,15 @@
       - gmail_account is defined
       - gmail_secret is defined
 
+- name: mail server private key generated
+  openssl_privatekey:
+    path: /etc/ssl/private/smtp.gmail.com.key
+    owner: root
+    group: wheel
+    mode: '0600'
+
 - name: mail server certificates generated
-  x509_certificate:
+  community.crypto.x509_certificate:
     path: /etc/ssl/smtp.gmail.com.crt
     privatekey_path: /etc/ssl/private/smtp.gmail.com.key
     provider: selfsigned
