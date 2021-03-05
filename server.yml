@@ -50,10 +50,12 @@
           state: present
         become: false
 
-      - shell: ifconfig vio0 | grep inet | awk '{print $2}'
+      - name: register vio0 IP address
+        shell: ifconfig vio0 | grep inet | awk '{print $2}'
         register: public_iface_address
 
-      - shell: ifconfig lo100 | grep inet | awk '{print $2}'
+      - name: register lo100 IP address
+        shell: ifconfig lo100 | grep inet | awk '{print $2}'
         register: services_address
 
       - import_role:
