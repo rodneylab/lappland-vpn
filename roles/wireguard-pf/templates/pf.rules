@@ -84,8 +84,8 @@ pass in quick on $wguard proto tcp from $wguard:network port $unpriv_ports \
 pass in quick on $wguard proto udp from $wguard:network port $unpriv_ports \
   to $services:0 port $local_services_udp_ports keep state \
   (max-src-conn 10, max-src-conn-rate 30/60, overload <overactive_hosts> flush)
-pass in on $wguard proto tcp from $wguard:network $unpriv_ports to $wguard:0 \
-  port $ssh_port flags S/SA modulate state \
+pass in on $wguard proto tcp from $wguard:network port $unpriv_ports \
+  to $wguard:0 port $ssh_port flags S/SA modulate state \
   (max-src-conn 5, max-src-conn-rate 5/60, overload <brutes> flush global)
 
 pass in on $wguard proto tcp from $wguard:network \
