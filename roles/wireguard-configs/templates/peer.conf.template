@@ -2,7 +2,7 @@
 Address = {{ item.address }}
 PrivateKey = PRIVATE_KEY
 MTU = 1380
-DNS = {{ ansible_lo100.ipv4.address }}
+DNS = {{ services_address.stdout }}
 
 [Peer]
 PublicKey = PEER_PUBLIC_KEY
