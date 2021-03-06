@@ -9,9 +9,8 @@ if [ ! -f "/var/unbound/etc/zone-block-general.conf" ]; then
     chmod 644 /var/unbound/etc/zone-block-general.conf
 fi
 
-/usr/local/bin/curl --ssl-reqd $url | grep '^0\.0\.0\.0' | awk \
-  '{print "\tlocal-zone: \""$2"\" redirect\n\tlocal-data: \""$2" A 0.0.0.0\""}' \
-  > $TEMP_FILE
+(/usr/local/bin/curl --ssl-reqd $url | grep '^0\.0\.0\.0' | sort) \
+  | awk '{print "\tlocal-zone: \""$2"\" refuse"}' > $TEMP_FILE
 if [[ ! -s $TEMP_FILE ]]; then
   printf "Error: empty file: "$TEMP_FILE"\n"; exit 1
 fi
