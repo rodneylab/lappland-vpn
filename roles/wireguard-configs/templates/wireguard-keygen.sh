@@ -17,6 +17,10 @@ echo "inet {{ wireguard_server_address }} 255.255.255.0 NONE description \"vpn t
 chmod 0640 $HOSTNAME_IF
 chown root:wheel $HOSTNAME_IF
 
+# bring interface down (if it is already up)
+ifconfig $1 down
+sleep 5
+
 # bring up interface
 /bin/sh /etc/netstart $1
 
@@ -24,7 +28,7 @@ chown root:wheel $HOSTNAME_IF
 SERVER_PUBLIC_KEY=$(ifconfig $1 | grep wgpubkey | cut -d ' ' -f 2)
 
 # Remove any existing peers
-ifconfig wg0 -wgpeerall
+ifconfig $1 -wgpeerall
 
 # Generate peer keys
 for peer in "${PEER_TEMPLATES_DIR}"/*; do

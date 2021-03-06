@@ -1,4 +1,11 @@
 ---
+- name: Packages used for WireGuard configuration installed
+  openbsd_pkg:
+    name:
+      - libqrencode
+      - wireguard-tools
+    state: present
+
 - name: WireGuard directories created
   file:
     path: "{{ item }}"
@@ -50,3 +57,14 @@
   ignore_errors: true
   changed_when: false
   check_mode: no
+
+- name: unbound config deployed
+  template:
+    src: unbound.conf
+    dest: /var/unbound/etc/unbound.conf
+    owner: root
+    group: wheel
+    mode: 644
+    backup: yes
+  notify:
+    - restart unbound
