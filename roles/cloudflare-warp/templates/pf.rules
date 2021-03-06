@@ -74,6 +74,8 @@ pass in on egress proto tcp to egress:0 port $ssh_port \
 
 pass in quick on egress proto udp from <wguard_peers_public> \
   to egress:0 port = {{ wireguard_port }}
+pass out quick on egress inet proto udp from egress:0 \
+  to <cloudflare-ip-list> port = {{ warp_wguard_port.stdout }}
 pass out quick on egress proto tcp from egress:0 to any port $public_tcp_ports
 pass out quick on egress proto udp from egress:0 to any port $public_udp_ports
 pass out quick on $warp proto tcp from $warp:0 to any port $public_tcp_ports
