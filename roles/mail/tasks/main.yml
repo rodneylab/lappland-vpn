@@ -45,7 +45,7 @@
     - restart smtpd
 
 - name: newaliases run
-  shell: "makemap -t aliases /etc/mail/aliases"
+  shell: newaliases
   ignore_errors: true
   changed_when: false
   check_mode: no
