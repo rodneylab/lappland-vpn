@@ -1,7 +1,7 @@
 # 🔒 Lappland VPN
 **WARNING** this project is still under development.  Some functionality may not behave as expected. Do not rely on any output generated. ❗️
 
-Lappland VPN is a security-focused, self-hosted, cloud VPN running on OpenBSD.  OpenBSD is a <a aria-label="Learn more about Open B S D" href="https://www.openbsd.org/" target="_blank" rel="noopener noreferrer">proactively secure</a> operating UNIX-like system.  The VPN only supports the modern, <a aria-label="Open the WireGuard project website" href="https://www.wireguard.com/" target="_blank" rel="noopener noreferrer">secure and fast WireGuard</a> protocol which itself only employs strong cryptographic algorithms.
+Lappland VPN is a security-focused, self-hosted, cloud VPN running on OpenBSD.  OpenBSD is a <a aria-label="Learn more about Open B S D" href="https://www.openbsd.org/" target="_blank" rel="noopener noreferrer">proactively secure</a> UNIX-like operating system.  The VPN only supports the modern, <a aria-label="Open the WireGuard project website" href="https://www.wireguard.com/" target="_blank" rel="noopener noreferrer">secure and fast WireGuard</a> protocol which itself only employs strong cryptographic algorithms.
 
 ## ☁️ Cloud Platform Setup
 Currently only Google Cloud is supported.  Follow the <a href="./docs/gcloud.md">Google Cloud Platform setup instructions</a> before creating your cloud VPN instance.
@@ -41,5 +41,5 @@ sh lappland.sh
 ```
 
 
-## 🍭Congratulations
+## 🍭 Congratulations
 You have set up you new Lappland VPN. ☕️ Sit Back and browse the internet privately and securely with your new VPN!
