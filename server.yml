@@ -85,3 +85,7 @@
       - import_role:
           name: cloudflare-warp
         tags: cloudflare-warp
+
+      - import_role:
+          name: hardening
+        tags: hardening

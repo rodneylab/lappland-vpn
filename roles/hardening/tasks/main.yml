@@ -13,6 +13,15 @@
     - /usr/local/bin/cargo
     - /usr/local/bin/rustc
 
+- name: Compiler permissions hardened
+  file:
+    path: "{{ item }}"
+    state: touch
+    mode: '0754'
+  with_items:
+    - /usr/local/go/bin/go
+  when: configure_phase
+
 - name: Accounting enabled
   shell: "/usr/sbin/rcctl enable accounting"
 
@@ -20,6 +29,7 @@
   shell: "/usr/sbin/mtree -cx -p /usr/local/sbin -K sha256digest,type > /etc/mtree/usr.local.sbin.secure"
   changed_when: false
   check_mode: no
+  when: configure_phase
 
 - name: custom mtree file permissions hardened
   file:
@@ -28,3 +38,4 @@
     owner: root
     group: wheel
     mode: '0600'
+  when: configure_phase

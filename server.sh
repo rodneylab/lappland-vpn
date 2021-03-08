@@ -15,6 +15,7 @@ extra_vars=$( jq -n \
               --arg wireguard_subnet "$WIREGUARD_SUBNET" \
               '{
                 "admin_account":$admin_account,
+                "configure_phase": True,
                 "lappland_id":$lappland_id,
                 "lappland_server_name":$lappland_server_name,
                 "lappland_server_ip":$lappland_server_ip,
