@@ -33,7 +33,7 @@ provider "google" {
 resource "google_compute_image" "lappland_vpn_image" {
   name = var.image_name
   raw_disk {
-    source = "gs://${var.bucket}/${var.image_file}"
+    source = "https://storage.googleapis.com://${var.bucket}/${var.image_file}"
     # sha1 = "003b5dca54c0931480a5e055659140b94cf87d76" hash bedfore extracting
   }
   family  = var.image_family
