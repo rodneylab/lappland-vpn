@@ -70,7 +70,6 @@
           name: "{{ wireguard_server_address }}"
           ansible_ssh_private_key_file: "{{ ssh_private_key_file }}"
 
-
 - name: Secure the SSH service on the server
   hosts: vpn-host
   gather_facts: true
