@@ -28,8 +28,7 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
   --member serviceAccount:lappland-vpn@${PROJECT_ID}.iam.gserviceaccount.com \
   --role roles/compute.admin
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
-  --member serviceAccount:lappland-vpn@{PROJECT_ID} \
-  iam.gserviceaccount.com \
+  --member serviceAccount:lappland-vpn@{PROJECT_ID} iam.gserviceaccount.com \
   --role roles/iam.serviceAccountUser
 ```
 **Attention**: take care of the credentials file, which contains the credentials to manage your Google Cloud account, including create and delete servers on this project.
@@ -42,19 +41,16 @@ gcloud services enable compute.googleapis.com
 ### Create a bucket for the image and upload it:
 ```bash
 BUCKET="gs://<enter-a name-for-your-bucket>"
-gcloud projects list
+REGION="<your-region e.g. us-west1>"
 gsutil mb -b on -l ${REGION} -p ${PROJECT_ID} ${BUCKET}
-IMAGE_HASH=$(openssl dgst -md5 -binary openbsd-amd64-68-201107.tar.gz | openssl enc -base64)
+IMAGE_HASH=$(openssl dgst -md5 -binary openbsd-amd64-68-201107.tar.gz \
+    | openssl enc -base64)
 gsutil -h Content-MD5:${IMAGE_HASH} \
     cp openbsd-amd64-68-201107.tar.gz \
     ${BUCKET}/openbsd-amd64-68-201107.tar.gz
-gcloud compute images create openbsd-amd64-68-201107 \
-    --source-uri ${BUCKET}/openbsd-amd64-68-201107.tar.gz \
-    --family openbsd-amd64-68 --project ${PROJECT_ID}
-gcloud compute images list --no-standard-images --project ${PROJECT_ID}
 ```
 
-If there was an error while uploading, get list of remote files with:
+If there was an error while uploading, get list of remote files (to check status) with:
 ```bash
 gsutil ls ${BUCKET}
 ```
