@@ -1,8 +1,6 @@
 ---
 - hosts: localhost
   become: false
-  vars_files:
-    - configs/properties.yml
   tasks:
     - name: Playbook dir stat
       stat:
@@ -51,6 +49,8 @@
 - name: Secure the SSH service on the server
   hosts: localhost
   tags: always
+  vars_files:
+    - configs/properties.yml
   become: false
 
   tasks:
@@ -72,6 +72,8 @@
 
 - name: Secure the SSH service on the server
   hosts: vpn-host
+  vars_files:
+    - configs/properties.yml
   gather_facts: true
   become: true
   tasks:
