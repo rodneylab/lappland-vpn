@@ -30,11 +30,10 @@ def set_directory(path: Path):
         os.chdir(origin)
 
 
-def get_random_server_name():
-    result = choices(string.ascii_lowercase, k=3)
-    for i in range(0, 7):
-        result.append(str(randint(0, 9)))
-    return ''.join(result)
+def get_config_parameter(parameter_name, parameters, default):
+    if parameter_name in parameters:
+        return parameters[parameter_name]
+    return default
 
 
 def get_date_string():
@@ -45,6 +44,13 @@ def get_lappland_ip():
     # todo(rodney): add jq command here to extract ip address from
     # terraform output
     return '0.0.0.0'
+
+
+def get_random_server_name():
+    result = choices(string.ascii_lowercase, k=3)
+    for i in range(0, 7):
+        result.append(str(randint(0, 9)))
+    return ''.join(result)
 
 
 def get_vpn_peers(parameters, server_address):
@@ -104,28 +110,20 @@ def load_config():
     return parameters
 
 
-def get_config_parameter(parameter_name, parameters, default):
-    if parameter_name in parameters:
-        return parameters[parameter_name]
-    return default
-
-
 def main():
     parameters = load_config()
     env_copy = os.environ.copy()
 
-    admin_account = 'lappland'
-    if 'admin_account' in parameters:
-        admin_account = parameters['admin_account']
+    admin_account = get_config_parameter(
+        'admin_account', parameters, 'lappland')
 
     if 'server_name' in parameters:
         server_name = parameters['server_name']
     else:
         server_name = get_random_server_name()
 
-    firewall_select_source = "0.0.0.0/0"
-    if 'firewall_select_source' in parameters:
-        firewall_select_source = parameters['firewall_select_source']
+    firewall_select_source = get_config_parameter(
+        'firewall_select_source', parameters, "0.0.0.0/0")
 
     if 'gcloud' in parameters:
         region = parameters['gcloud']['region']
