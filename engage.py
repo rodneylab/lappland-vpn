@@ -161,14 +161,18 @@ def main():
             subprocess.check_call(command, stdout=fout, env=env_copy)
 
     env_copy['LAPPLAND_SERVER_IP'] = get_lappland_ip()
-    env_copy['SSH_PRIVATE_KEY_FILE'] = get_ssh_key_name()
-    env_copy['SSH_CLIENTS'] = get_config_parameter(
+    ssh_private_key_file = get_ssh_key_name()
+    env_copy['SSH_PRIVATE_KEY_FILE'] = ssh_private_key_file
+    ssh_clients = get_config_parameter(
         'ssh_clients', parameters, firewall_select_source)
-    env_copy['WIREGUARD_PEERS'] = get_config_parameter(
+    env_copy['SSH_CLIENTS'] = ssh_clients
+    wireguard_peers = get_config_parameter(
         'wireguard_peers', parameters, firewall_select_source)
+    env_copy['WIREGUARD_PEERS'] = wireguard_peers
     wireguard_address = get_vpn_wg_server_address()
     env_copy['WIREGUARD_SERVER_ADDRESS'] = wireguard_address
-    env_copy['WIREGUARD_SUBNET'] = get_vpn_wg_subnet(wireguard_address)
+    wireguard_subnet = get_vpn_wg_subnet(wireguard_address)
+    env_copy['WIREGUARD_SUBNET'] = wireguard_subnet
     env_copy['PEERS'] = get_vpn_peers(parameters, wireguard_address)
 
     response = input("Do you accept wgcf Terms of Service? (yes/no) ")
@@ -177,6 +181,20 @@ def main():
 
     command = ['sh', 'server.sh']
     subprocess.check_call(command, env=env_copy)
+
+    # update lappland properties file
+    properties = {
+      'lappland_server_name': server_name,
+      'ssh_clients': ssh_clients,
+      'ssh_port': str(parameters['ssh_port']),
+      'ssh_private_key_file': ssh_private_key_file,
+      'wireguard_peers': wireguard_peers,
+      'wireguard_port': str(parameters['wg_port']),
+      'wireguard_server_address': wireguard_address,
+      'wireguard_subnet': wireguard_subnet,
+    }
+    with open('configs/properties.yml', 'w') as properties_file:
+        yaml.dump(properties, properties_file)
 
 
 if __name__ == "__main__":
