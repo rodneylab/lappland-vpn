@@ -1,0 +1,36 @@
+---
+- name: Wireguard directory cleaned up
+  file:
+    path: /etc/wireguard/peers
+    state: absent
+
+- name: Register Cloudflare Warp endpoint
+  shell: cat /root/git/wgcf/wgcf-profile.conf | grep Endpoint | grep -Eo "[0-9]{3,5}$"
+  register: warp_wguard_port
+
+- name: Deploy pf.rules
+  template:
+    src: pf.rules
+    dest: /etc/pf.anchors/
+    owner: root
+    group: wheel
+    mode: 0600
+    backup: no
+
+- name: reload pf rules anchor
+  shell: pfctl -a pf.rules -F Tables && pfctl -a pf.rules -f /etc/pf.anchors/pf.rules
+
+- name: Deploy /etc/ssh/sshd_config
+  template:
+    src: sshd_config
+    dest: /etc/ssh/sshd_config
+    owner: root
+    group: wheel
+    mode: 0600
+  notify:
+    - restart sshd
+
+- name: sshd is restarted
+  service:
+    name: sshd
+    state: restarted

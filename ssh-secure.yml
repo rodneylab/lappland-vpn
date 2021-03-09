@@ -1,0 +1,82 @@
+---
+- hosts: localhost
+  become: false
+  vars_files:
+    - configs/properties.yml
+  tasks:
+    - name: Playbook dir stat
+      stat:
+        path: "{{ playbook_dir }}"
+      register: _playbook_dir
+
+    - name: Ensure Ansible is not being run in a world writable directory
+      assert:
+        that: _playbook_dir.stat.mode|int <= 0775
+        msg: >
+          Ansible is being run in a world writable directory ({{ playbook_dir }}), ignoring it as an ansible.cfg source.
+          For more information see https://docs.ansible.com/ansible/devel/reference_appendices/config.html#cfg-in-world-writable-dir
+
+    - name: Ensure the requirements installed
+      debug:
+        msg: "{{ '' | ipaddr }}"
+      ignore_errors: true
+      no_log: true
+      register: ipaddr
+
+    - name: Set required ansible version as a fact
+      set_fact:
+        required_ansible_version:
+          "{{ item |  regex_replace('^ansible[\\s+]?(?P<op>[=,>,<]+)[\\s+]?(?P<ver>\\d.\\d(.\\d+)?)$',
+                      '{\"op\": \"\\g<op>\",\"ver\": \"\\g<ver>\" }') }}"
+      when: '"ansible" in item'
+      with_items: "{{ lookup('file', 'requirements.txt').splitlines() }}"
+
+    - name: Verify Python meets Lappland VPN requirements
+      assert:
+        that: (ansible_python.version.major|string + '.' + ansible_python.version.minor|string)|float is version('3.6', '>=')
+        msg: >
+          Python version is not supported.
+          You must upgrade to at least Python 3.6 to use this version of Lappland.
+
+    - name: Verify Ansible meets Lappland VPN requirements
+      assert:
+        that:
+          - ansible_version.full is version(required_ansible_version.ver, required_ansible_version.op)
+          - not ipaddr.failed
+        msg: >
+          Ansible version is {{ ansible_version.full }}.
+          You must update the requirements to use this version of Lappland.
+          Try to run python3 -m pip install -U -r requirements.txt
+
+- name: Secure the SSH service on the server
+  hosts: localhost
+  tags: always
+  become: false
+
+  tasks:
+    - block:
+      - name: Add the server to an inventory group
+        add_host:
+          name: "{{ wireguard_server_address }}"
+          groups: vpn-host
+          ansible_connection: "ssh"
+          ansible_ssh_user: "{{ admin_account }}"
+          ansible_ssh_port: "{{ ssh_port }}"
+          ansible_python_interpreter: "/usr/local/bin/python3"
+          lappland_server_name: "{{ lappland_server_name }}"
+
+      - name: Additional variables for the server
+        add_host:
+          name: "{{ wireguard_server_address }}"
+          ansible_ssh_private_key_file: "{{ ssh_private_key_file }}"
+
+
+- name: Secure the SSH service on the server
+  hosts: vpn-host
+  gather_facts: true
+  become: true
+  tasks:
+    - block:
+      - import_role:
+          name: ssh-secure
+        tags: ssh-secure
