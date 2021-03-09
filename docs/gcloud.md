@@ -36,6 +36,7 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
 - Enable the compute service:
 ```bash
 gcloud services enable compute.googleapis.com
+gcloud services enable cloudresourcemanager.googleapis.com
 ```
 
 ### Create a bucket for the image and upload it:
