@@ -53,6 +53,15 @@ def get_random_server_name():
     return ''.join(result)
 
 
+def get_ssh_key_name():
+    return './configs/id_ed25519_lappland_' + get_date_string()
+
+
+def get_ssh_public_key(filename):
+    f = open(filename + '.pub', 'r')
+    return str(f.readlines()[0])
+
+
 def get_vpn_peers(parameters, server_address):
     wg_subnet = IPv4Network(str(server_address) + "/24", False)
     addresses_dict = {}
@@ -93,15 +102,6 @@ def get_vpn_wg_server_address():
 
 def get_vpn_wg_subnet(server_address):
     return str(IPv4Network(str(server_address) + "/24", False))
-
-
-def get_ssh_key_name():
-    return './configs/id_ed25519_lappland_' + get_date_string()
-
-
-def get_ssh_public_key(filename):
-    f = open(filename + '.pub', 'r')
-    return str(f.readlines()[0])
 
 
 def load_config():
