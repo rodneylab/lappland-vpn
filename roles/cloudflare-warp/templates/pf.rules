@@ -68,9 +68,6 @@ pass in log proto tcp from any to any flags R/R \
 
 # ssh block
 block in log quick proto tcp from <brutes> to any label BRUTES_FROM_EXTERNAL
-pass in on egress proto tcp to egress:0 port $ssh_port \
-  flags S/SA modulate state \
-  (max-src-conn 5, max-src-conn-rate 5/60, overload <brutes> flush global)
 
 pass in quick on egress proto udp from <wguard_peers_public> \
   to egress:0 port = {{ wireguard_port }}
@@ -80,8 +77,6 @@ pass out quick on egress proto tcp from egress:0 to any port $public_tcp_ports
 pass out quick on egress proto udp from egress:0 to any port $public_udp_ports
 pass out quick on $warp proto tcp from $warp:0 to any port $public_tcp_ports
 pass out quick on $warp proto udp from $warp:0 to any port $public_udp_ports
-pass in on egress proto tcp to egress:0 port $ssh_port flags S/SA modulate state \
-  (max-src-conn 5, max-src-conn-rate 5/60, overload <brutes> flush global)
 pass in on egress proto tcp from <ssh_clients_public> \
   to egress:0 port $ssh_port flags S/SA modulate state \
   (max-src-conn 5, max-src-conn-rate 5/60, overload <brutes> flush global)
