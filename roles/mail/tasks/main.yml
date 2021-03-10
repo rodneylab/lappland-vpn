@@ -33,23 +33,6 @@
   notify:
     - restart smtpd
 
-- name: OpenSMTP aliases deployed
-  template:
-    src: aliases
-    dest: /etc/mail/
-    owner: root
-    group: wheel
-    mode: '0644'
-    backup: no
-  notify:
-    - restart smtpd
-
-- name: newaliases run
-  shell: newaliases
-  ignore_errors: true
-  changed_when: false
-  check_mode: no
-
 - name: Check for secrets.db
   shell: "ls /etc/mail/secrets.db"
   register: secretsdb
@@ -82,3 +65,20 @@
   file:
     state: absent
     path: /etc/mail/secrets
+
+- name: OpenSMTP aliases deployed
+  template:
+    src: aliases
+    dest: /etc/mail/
+    owner: root
+    group: wheel
+    mode: '0644'
+    backup: no
+  notify:
+    - restart smtpd
+
+- name: newaliases run
+  shell: newaliases
+  ignore_errors: true
+  changed_when: false
+  check_mode: no
