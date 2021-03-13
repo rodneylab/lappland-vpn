@@ -69,6 +69,17 @@
 - name: encrypted-dns-server built
   # shell: cargo install --version 0.3.23 encrypted-dns
   shell: cargo install encrypted-dns
+  async: 10800
+  poll: 0
+  register: encrypted_dns_build
+
+# - name: Check on encrypted-dns build
+#   async_status:
+#     jid: "{{ encrypted_dns_build.ansible_job_id }}"
+#   register: job_result
+#   until: job_result.finished
+#   retries: 72
+#   delay: 600
 
 - name: encrypted-dns-server stripped
   shell: strip /root/.cargo/bin/encrypted-dns
