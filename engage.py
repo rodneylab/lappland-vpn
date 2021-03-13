@@ -150,8 +150,8 @@ def main():
 
     # todo(rodney): prompt for image path
     image_path = get_image_path()
-    env_copy['TF_VAR_image'] = image_path
-    env_copy['TF_VAR_image_name'] = image_path.stem.stem
+    env_copy['TF_VAR_image'] = str('../../../' / image_path)
+    env_copy['TF_VAR_image_name'] = Path(image_path.stem).stem
     env_copy['TF_VAR_image_file'] = image_path.name
     env_copy['TF_VAR_image_family'] = 'openbsd-amd64-68'
 
