@@ -19,6 +19,11 @@
   notify:
     - restart pf
 
+- name: martians updated
+  lineinfile:
+    path: /etc/pf/martians
+    line: "!{{ wireguard_subnet }}"
+
 - name: anchor reloaded
   shell: "/sbin/pfctl -a pf.rules -F Tables && /sbin/pfctl -a pf.rules -f /etc/pf.anchors/pf.rules"
   changed_when: false
