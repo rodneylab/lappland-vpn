@@ -33,7 +33,7 @@ provider "google" {
 resource "google_compute_image" "lappland_vpn_image" {
   name = var.image_name
   raw_disk {
-    source = "https://storage.googleapis.com://${var.bucket}/${var.image_file}"
+    source = "https://storage.googleapis.com/${var.bucket}/${var.image_file}"
     # sha1 = "003b5dca54c0931480a5e055659140b94cf87d76" hash bedfore extracting
   }
   family  = var.image_family
@@ -67,7 +67,7 @@ resource "google_compute_address" "static" {
 
 resource "google_project_service" "service" {
   for_each = toset([
-    "cloudresourcemanager.googleapis.com"
+    "cloudresourcemanager.googleapis.com",
     "compute.googleapis.com"
   ])
 
@@ -99,21 +99,20 @@ resource "google_compute_instance" "lappland_vpn" {
   }
 
   metadata = {
-    ssh-keys    = var.ssh_key
-    lappland-id = var.lappland_id
+    instance-type = "lappland-vpn"
+    lappland-id   = var.lappland_id
+    ssh-keys      = var.ssh_key
   }
 
   network_interface {
     network = google_compute_network.vpc_network.name
     access_config {
-      nat_ip = google_compute_address.static.address
-      # type         = "ONE_TO_ONE_NAT"
+      nat_ip       = google_compute_address.static.address
       network_tier = "PREMIUM"
     }
   }
-  # depends_on = [google_project_service.service]
 }
 
-output "instance_id" {
-  value = google_compute_instance.lappland_vpn.self_link
+output "external_ip" {
+  value = google_compute_instance.lappland_vpn.network_interface.0.access_config.0.nat_ip
 }
