@@ -1,10 +1,11 @@
 #!/usr/bin/env python3 -tt
 # -*- coding: utf-8 -*-
+from contextlib import contextmanager
 import datetime
 from ipaddress import IPv4Network, IPv4Address
-from random import choices, getrandbits, randint
-from contextlib import contextmanager
+import json
 import os
+from random import choices, getrandbits, randint
 from pathlib import Path
 import string
 import subprocess
@@ -40,10 +41,25 @@ def get_date_string():
     return datetime.datetime.now().strftime('%Y-%m-%d')
 
 
+def get_image_path():
+    response = input('Please enter the path to your .tar.gz OpenBSD image')
+    path = Path(response)
+    if path.is_file():
+        print('Thanks for your help.')
+        return path
+    print('We can\'t find that file.  Would you mind checking the path is '
+          + 'correct?')
+    return get_image_path()
+
+
 def get_lappland_ip():
-    # todo(rodney): add jq command here to extract ip address from
-    # terraform output
-    return '0.0.0.0'
+    with open('terraform-output.json') as json_file:
+        json_dict = json.load(json_file)
+        return json_dict.external_ip.value
+    response = input(
+        "We were not able to retreive lappland ip address from"
+        + "terraform output.  Please enter the IP (e.g. 100.101.102.103)")
+    return response
 
 
 def get_random_server_name():
@@ -133,21 +149,37 @@ def main():
     subprocess.check_call(command, env=env_copy)
 
     # todo(rodney): prompt for image path
-    env_copy['TF_VAR_image'] = '../../../../openbsd-amd64-68-210227.tar.gz'
-    env_copy['TF_VAR_image_name'] = 'openbsd-amd64-68-210227'
-    env_copy['TF_VAR_image_file'] = 'openbsd-amd64-68-210227.tar.gz'
+    image_path = get_image_path()
+    env_copy['TF_VAR_image'] = image_path
+    env_copy['TF_VAR_image_name'] = image_path.stem.stem
+    env_copy['TF_VAR_image_file'] = image_path.name
     env_copy['TF_VAR_image_family'] = 'openbsd-amd64-68'
 
-    env_copy['TF_VAR_bucket'] = 'lappland-openbsd-images-2021-03-02'
+    bucket_name = input(
+        "Could you enter a name for the bucket (e.g. 'my-openbsd-images')? ")
+    print('Thanks')
+    env_copy['TF_VAR_bucket'] = bucket_name
     env_copy['TF_VAR_project_id'] = os.getenv('GOOGLE_PROJECT')
     env_copy['TF_VAR_region'] = region
     env_copy['TF_VAR_server_name'] = server_name
     env_copy['TF_VAR_ssh_port'] = str(parameters['ssh_port'])
     env_copy['TF_VAR_wg_port'] = str(parameters['wg_port'])
     env_copy['TF_VAR_firewall_select_source'] = firewall_select_source
-    env_copy['TF_VAR_lappland_id'] = 'lappland-b'
+    env_copy['TF_VAR_lappland_id'] = get_config_parameter(
+        'lappland-id', parameters, 'lappland')
     env_copy['TF_VAR_ssh_key'] = admin_account + ':' \
         + get_ssh_public_key(get_ssh_key_name())
+
+    with set_directory(Path('./terraform/gcloud/image')):
+        subprocess.check_call(['terraform', 'init'], env=env_copy)
+        with open('../../terraform-image-plan.log', 'w') as fout:
+            command = ['terraform', 'plan']
+            subprocess.check_call(command, stdout=fout, env=env_copy)
+
+        subprocess.check_call(['terraform', 'apply'], env=env_copy)
+        with open('../../terraform-image-output.json', 'w') as fout:
+            command = ['terraform', 'output', '-json']
+            subprocess.check_call(command, stdout=fout, env=env_copy)
 
     with set_directory(Path('./terraform/gcloud')):
         subprocess.check_call(['terraform', 'init'], env=env_copy)
