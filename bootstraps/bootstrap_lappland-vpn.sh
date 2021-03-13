@@ -1,5 +1,21 @@
 #!/bin/sh
 
+# get instance type (lappland-vpn or lappland-santa)
+instance_type=$(/usr/local/bin/curl -s \
+  --resolve metadata.google.internal:80:169.254.169.254 \
+  -H "Metadata-Flavor: Google" \
+  http://metadata.google.internal/computeMetadata/v1/instance/attributes/instance-type)
+
+# check we do not want to install lappland-vpn instead
+get_instance_type() {
+  if [instance_type == 'lappland-santa']; then
+    /usr/local/bin/curl -Lo /root/bootstrap_lappland-santa.sh \
+      https://raw.githubusercontent.com/rodneylab/lappland-santa/main/bootstraps/bootstrap_lappland-santa.sh
+    sh /root/git/lappland-vpn/bootstraps/bootstrap_lappland-santa.sh
+    exit 0
+  fi
+}
+
 # bootstrap the system
 /usr/local/bin/curl -L \
   https://raw.githubusercontent.com/rodneylab/lappland-vpn/main/bootstraps/bootstrap_raw.sh \
@@ -74,8 +90,7 @@ extra_vars=$( /usr/local/bin/jq -n \
 )
 
 # Run playbook
-cd /root/git/lappland-vpn/ && /usr/local/bin/ansible-playbook \
-  install.yml \
-  --tag=users,system,sysctl,pf-base,dnscrypt-proxy,unbound,encrypted-dns,hardening,reboot \
+cd /root/git/lappland-vpn/ && /usr/local/bin/ansible-playbook install.yml \
+  --tag=users,system,sysctl,pf-base,dnscrypt-proxy,unbound,encrypted-dns,hardening \
   --extra-vars="$extra_vars" 2>&1 | tee -a /var/log/bootstrap && \
   touch "/var/log/lappland-result.json"
