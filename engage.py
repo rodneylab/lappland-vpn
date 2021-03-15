@@ -216,6 +216,7 @@ def main():
 
     # update lappland properties file
     properties = {
+      'admin_account': admin_account,
       'lappland_server_name': server_name,
       'ssh_clients': ssh_clients,
       'ssh_port': str(parameters['ssh_port']),
