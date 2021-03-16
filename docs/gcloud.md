@@ -36,10 +36,13 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
 - Enable the compute service:
 ```bash
 gcloud services enable compute.googleapis.com
+gcloud services enable iam.googleapis.com
 gcloud services enable cloudresourcemanager.googleapis.com
+gcloud services enable serviceusage.googleapis.com
 ```
 
 ### Create a bucket for the image and upload it:
+You need to choose a unique name for your bucket.  You might consider adding randomly generated characters to help create a unique name for it.
 ```bash
 BUCKET="gs://<enter-a name-for-your-bucket>"
 REGION="<your-region e.g. us-west1>"
