@@ -5,7 +5,7 @@ then
 fi
 
 cd /root/git
-git clone https://github.com/cofyc/dnscrypt-wrapper.git
+/usr/local/bin/git clone https://github.com/cofyc/dnscrypt-wrapper.git
 cd dnscrypt-wrapper
-gmake LDFLAGS='-L/usr/local/lib/' CFLAGS=-I/usr/local/include/
-gmake LDFLAGS='-L/usr/local/lib/' CFLAGS=-I/usr/local/include/ install
+/usr/local/bin/gmake LDFLAGS='-L/usr/local/lib/' CFLAGS=-I/usr/local/include/
+/usr/local/bin/gmake LDFLAGS='-L/usr/local/lib/' CFLAGS=-I/usr/local/include/ install
