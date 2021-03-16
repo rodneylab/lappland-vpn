@@ -32,7 +32,7 @@ resource "google_project_service" "service" {
   disable_on_destroy = false
 }
 
-resource "google_storage_bucket" "lappland-openbsd-images" {
+resource "google_storage_bucket" "lappland_image_bucket" {
   name          = var.bucket
   project       = var.project_id
   location      = "EUROPE-WEST2"
@@ -55,14 +55,4 @@ resource "google_storage_bucket" "lappland-openbsd-images" {
   #   # member = "user:example-user@example.com"
   #   member = var.service_account
   # }]
-}
-
-resource "google_storage_bucket_object" "lappand-vpn-image" {
-  bucket = var.bucket
-  name   = var.image_file
-  source = var.image
-}
-
-output "image_hash" {
-  value = google_storage_bucket_object.lappand-vpn-image.md5hash
 }
