@@ -4,11 +4,13 @@ from contextlib import contextmanager
 import datetime
 from ipaddress import IPv4Network, IPv4Address
 import json
+import netaddr
 import os
 from random import choices, getrandbits, randint
 from pathlib import Path
 import string
 import subprocess
+import time
 import yaml
 
 
@@ -42,7 +44,7 @@ def get_date_string():
 
 
 def get_image_path():
-    response = input('Please enter the path to your .tar.gz OpenBSD image')
+    response = input('Please enter the path to your .tar.gz OpenBSD image\n')
     path = Path(response)
     if path.is_file():
         print('Thanks for your help.')
@@ -54,12 +56,14 @@ def get_image_path():
 
 def get_lappland_ip():
     with open('terraform-output.json') as json_file:
-        json_dict = json.load(json_file)
-        return json_dict.external_ip.value
-    response = input(
-        "We were not able to retreive lappland ip address from"
-        + "terraform output.  Please enter the IP (e.g. 100.101.102.103)")
-    return response
+        json_dict = json.loads(json_file.read())
+        ip = json_dict['external_ip']['value']
+        if netaddr.valid_ipv4(ip) or netaddr.valid_ipv6(ip):
+            return ip
+        response = input(
+            "We were not able to retreive lappland ip address from"
+            + "terraform output.  Please enter the IP (e.g. 100.101.102.103)")
+        return response
 
 
 def get_random_server_name():
@@ -150,6 +154,7 @@ def main():
 
     # todo(rodney): prompt for image path
     image_path = get_image_path()
+    time.sleep(2)
     env_copy['TF_VAR_image'] = str('../../../' / image_path)
     env_copy['TF_VAR_image_name'] = Path(image_path.stem).stem
     env_copy['TF_VAR_image_file'] = image_path.name
