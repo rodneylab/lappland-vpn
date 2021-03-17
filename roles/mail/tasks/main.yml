@@ -8,6 +8,8 @@
 - name: mail server private key generated
   openssl_privatekey:
     path: /etc/ssl/private/smtp.gmail.com.key
+    type: ECC
+    curve: secp384r1
     owner: root
     group: wheel
     mode: '0600'
