@@ -74,7 +74,14 @@ def get_random_server_name():
 
 
 def get_ssh_key_name():
-    return './configs/id_ed25519_lappland_' + get_date_string()
+    default_name = './configs/id_ed25519_lappland_' + get_date_string()
+    path = Path('./configs/properties.yml')
+    if path.is_file():
+        with open(str(path)) as file:
+            properties = yaml.load(file, Loader=yaml.FullLoader)
+            return get_config_parameter(
+                'ssh_private_key_file', properties, default_name)
+    return default_name
 
 
 def get_ssh_public_key(filename):
