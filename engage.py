@@ -6,8 +6,8 @@ from ipaddress import IPv4Network, IPv4Address
 import json
 import netaddr
 import os
-from random import choices, getrandbits, randint
 from pathlib import Path
+from random import choices, getrandbits, randint
 import string
 import subprocess
 import time
@@ -159,7 +159,6 @@ def main():
     command = ['sh', 'generate-ssh-keys.sh', get_ssh_key_name()]
     subprocess.check_call(command, env=env_copy)
 
-    # todo(rodney): prompt for image path
     image_path = get_image_path()
     time.sleep(2)
     env_copy['TF_VAR_image'] = str('../../../' / image_path)
