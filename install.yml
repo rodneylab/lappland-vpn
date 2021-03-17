@@ -11,4 +11,4 @@
     - { role: unbound, tags: unbound }
     - { role: encrypted-dns, tags: encrypted-dns }
     - { role: hardening, tags: hardening }
-    - { role: reboot, tags: reboot }
+    # - { role: reboot, tags: reboot }
