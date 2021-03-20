@@ -3,7 +3,7 @@ LOG_DIR="/var/log/suricata"
 min_file_size=64000
 file_size=`du -k ${LOG_DIR}/eve.json | tr -s '\t' ' ' | cut -d' ' -f1`
 if [ $file_size -gt $min_file_size ]; then
-  timestamp=`sh -c 'date -r $(expr $(date +%s) + 3600) +%Y-%m-%d-%H-00'`
+  timestamp=`sh -c 'date -r $(expr $(date +%s) / 1800 \* 1800) +%Y-%m-%d-%H-%M-%S'`
 
   # roll over logs
   /usr/bin/find ${LOG_DIR}/ -name "*.json" -exec \

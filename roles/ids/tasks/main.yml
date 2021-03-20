@@ -71,10 +71,14 @@
     job: "/bin/sh /etc/suricata/suricata-rules-update.sh"
     user: root
 
+- name: random run times for suricata rotation generated
+  set_fact:
+    suricata_cron_minute: "{{ range(0,30) | random }}"
+
 - name: suricata-log-rotate.sh script added to cron
   cron:
     name: Suricata log update
-    minute: "{{ range(0,60) | random }}"
+    minute: "{{ suricata_cron_minute }},{{ (suricata_cron_minute + 30) }}"
     job: "/bin/sh /etc/suricata/suricata-log-rotate.sh"
     user: root
 
