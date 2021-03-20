@@ -77,7 +77,7 @@
 
 - name: suricata-log-rotate.sh script added to cron
   cron:
-    name: Suricata log update
+    name: Suricata log rotate
     minute: "{{ suricata_cron_minute }},{{ (suricata_cron_minute + 30) }}"
     job: "/bin/sh /etc/suricata/suricata-log-rotate.sh"
     user: root
