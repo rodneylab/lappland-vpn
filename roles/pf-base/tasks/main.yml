@@ -40,7 +40,7 @@
     backup: no
 
 - name: blocklist deployed
-  template:
+  copy:
     src: blocklist
     dest: /etc/pf/
     owner: root
@@ -49,7 +49,7 @@
     backup: no
 
 - name: zones deployed
-  template:
+  copy:
     src: zones
     dest: /etc/pf/
     owner: root
@@ -70,7 +70,7 @@
     - /etc/pf/output
 
 - name: block-asns files deployed
-  template:
+  copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     owner: "{{ admin_account }}"
@@ -81,7 +81,7 @@
     - { src: 'myspace', dest: '/etc/pf/block-asns/myspace'}
 
 - name: asns files deployed
-  template:
+  copy:
     src: "{{ item }}"
     dest: /etc/pf/asns/
     owner: "{{ admin_account }}"
@@ -95,7 +95,7 @@
     - 'netflix'
 
 - name: pf-tables script deployed
-  template:
+  copy:
     src: pf-tables.sh
     dest: /etc/pf/
     owner: "{{ admin_account }}"

@@ -36,7 +36,7 @@ create_table_file_from_asns_folder () {
 # Create threats file
 rm $threats 2>/dev/null
 touch $threats
-curl -sq \
+/usr/local/bin/curl -sq \
   "https://pgl.yoyo.org/adservers/iplist.php?ipformat=&showintro=0&mimetype=plaintext" \
   "https://www.binarydefense.com/banlist.txt" \
   "https://rules.emergingthreats.net/blockrules/compromised-ips.txt" \
@@ -54,10 +54,15 @@ rm $zones 2>/dev/null
 touch $zones
 for zone in $(grep -v "^#" ${PF_WORKING_DIR}/zones | sed "s/\ \ \#.*//g") ; do
   printf " $zone"
-  curl -sq \
+  /usr/local/bin/curl -sq \
     https://www.ipdeny.com/ipblocks/data/countries/$zone.zone >> $zones
 done
 printf "\n"
+if [ ! -s $zones ]
+then
+  rm -f $zones
+  zones=$(find ${OUTPUT_DIR} -name zones.\* -maxdepth 1 | sort -V | tail -n 1)
+fi
 wc -l $zones
 
 # Create custom file
@@ -68,13 +73,14 @@ printf "\n"
 wc -l $custom
 
 # Create blocklist file
-sort $threats $custom $zones | uniq > $blocklist
-wc -l $blocklist
-if [[ ! -s $blocklist ]]; then
-  printf "Error empty file: "$blocklist"\n"; exit 1
+if [ -s $threats ] && [ -s $zones ]; then
+  sort $threats $custom $zones | uniq > $blocklist
+  wc -l $blocklist
+  # if [[ ! -s $blocklist ]]; then
+  #   printf "Error empty file: "$blocklist"\n"; exit 1
+  # fi
+  cp $blocklist /etc/pf/blocklist
 fi
-cp $blocklist /etc/pf/blocklist
-
 
 # Create cloudflare table
 create_table_file_from_asns_file "$cloudflare" "${ASNS_DIR}/cloudflare"
